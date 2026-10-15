@@ -41,8 +41,14 @@ export const buttonVariants = cva(
         link: "border-transparent text-foreground underline-offset-4 hover:underline data-pressed:underline *:data-[slot=button-loading-indicator]:text-foreground",
         outline:
           "border-input bg-popover not-dark:bg-clip-padding text-foreground shadow-xs/5 not-disabled:not-active:not-data-pressed:before:shadow-[0_1px_--theme(--color-black/4%)] hover:bg-accent/50 data-pressed:bg-accent/50 *:data-[slot=button-loading-indicator]:text-foreground dark:bg-input/32 dark:data-pressed:bg-input/64 dark:hover:bg-input/64 dark:not-disabled:before:shadow-[0_-1px_--theme(--color-white/2%)] dark:not-disabled:not-active:not-data-pressed:before:shadow-[0_-1px_--theme(--color-white/6%)] [:disabled,:active,[data-pressed]]:shadow-none",
+        magic:
+          "not-disabled:inset-shadow-[0_1px_--theme(--color-white/16%)] border-magic bg-magic text-white shadow-magic/24 shadow-xs hover:bg-magic/90 data-pressed:bg-magic/90 *:data-[slot=button-loading-indicator]:text-white [:disabled,:active,[data-pressed]]:shadow-none",
+        raised:
+          "border-raised-stroke bg-linear-to-b from-45% from-raised-1 via-64% via-raised-2 to-98% to-raised-3 text-foreground shadow-raised before:border before:border-raised-edge hover:inset-shadow-[0_0_0_100px_--theme(--color-black/2%)] data-pressed:inset-shadow-[0_0_0_100px_--theme(--color-black/4%)] *:data-[slot=button-loading-indicator]:text-foreground dark:hover:inset-shadow-[0_0_0_100px_--theme(--color-black/20%)] [:disabled]:shadow-none",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/90 data-pressed:bg-secondary/90 *:data-[slot=button-loading-indicator]:text-secondary-foreground [:active,[data-pressed]]:bg-secondary/80",
+        soft:
+          "border-transparent bg-brand-soft text-brand-soft-foreground hover:bg-brand-soft/80 data-pressed:bg-brand-soft/80 *:data-[slot=button-loading-indicator]:text-brand-soft-foreground",
       },
     },
   },
