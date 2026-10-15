@@ -9,16 +9,22 @@ bun install
 bun run dev
 ```
 
-Open the local URL that Vite prints. Use the top bar to change the following settings:
+Open the local URL that Vite prints. The top bar has the following controls:
 
-- **Colour:** The brand colour: Cobalt, Violet, Emerald, Ember, Rose, Graphite, or Custom. Custom opens a picker where you can choose any colour or type a hex code, such as `#ff5a1f`. Light colours automatically get dark text so buttons stay readable.
-- **Radius:** The corner roundness of every component, from None to Round.
-- **Font:** The body font. The default is TikTok Sans.
-- **Headings:** The heading font. The default is the body font.
-- **Motion:** How components animate: Off, Snappy, Smooth, or Springy. The default is Snappy.
-- **Mode:** Light, system, or dark.
+- **Theme:** Choose a complete look. The presets are Project (the default), Paper, Midnight, Forest, Mono, and Candy. Your saved themes appear under **Saved**.
+- **Customise:** Opens a panel with every setting:
+  - **Brand colour:** Cobalt, Violet, Emerald, Ember, Rose, Graphite, or Custom. Custom shows a colour picker and a hex field, such as `#ff5a1f`.
+  - **Tone of the greys:** Neutral, Cool, Warm, or Brand, which tints surfaces with the brand colour.
+  - **Dark mode:** Dim (charcoal), Deep (near-black), or Black (true black).
+  - **Contrast:** Soft or Crisp. Crisp makes text, borders, and secondary text stronger.
+  - **Corners:** None, Small, Medium, Large, or Round.
+  - **Type:** The body font and the heading font.
+  - **Motion:** Off, Snappy, Smooth, or Springy.
+- **Mode:** Light, system, or dark. This setting only changes your view; every theme includes both light and dark colours.
+- **Saved themes** (bookmark icon): Save the current settings under a name, or delete the saved theme you're using. Saved themes stay in this browser.
+- **Copy theme:** Copies the full CSS for the current theme: font imports, every light and dark colour, corners, and motion.
 
-Select **Copy theme** to copy the CSS for your current settings.
+The Customise panel shows whether all text is readable. The **Readability** section on the Foundations page lists each text and background pair with its contrast ratio in light and dark mode. Normal text needs at least 4.5:1 to pass WCAG AA.
 
 The font choices are TikTok Sans, Inter, Geist, DM Sans, Plus Jakarta Sans, Manrope, Figtree, Onest, Space Grotesk, and Bricolage Grotesque. All are Google Fonts, loaded through [Fontsource](https://fontsource.org) so they work offline.
 
@@ -102,6 +108,12 @@ The following rules apply in every preset:
 
 To tune motion, change the tokens at the top of `src/motion.css`, such as `--duration-popup`, `--ease-out`, or `--scale-popup`. To rebuild the Springy curve, run `bun scripts/spring-easing.ts <duration> <bounce>`.
 
+## Colours
+
+`src/palette.ts` generates every colour from four inputs: the brand colour, the tone, the dark mode style, and the contrast level. It produces matching light and dark values, and adjusts derived text colours, such as soft badge text, until they pass WCAG AA. Every preset combination passes AA.
+
+The default palette is written into `src/index.css` by `scripts/sync-theme.ts`, which `bun run registry` runs automatically. To change the default colours, edit `src/palette.ts`, not `src/index.css`.
+
 ## What Project UI adds to Coss
 
 | Addition | Details |
@@ -109,6 +121,7 @@ To tune motion, change the tokens at the top of `src/motion.css`, such as `--dur
 | Colours | Slate text, soft surfaces, light borders, and a matching dark palette. The primary colour is the brand colour. |
 | Brand tokens | `brand`, `brand-soft`, `magic`, `pro`, and `highlight`, available as Tailwind colours such as `bg-brand`. |
 | Recolouring | `--brand-l` (lightness), `--brand-h` (hue), and `--brand-c` (chroma) set every brand colour in both modes. |
+| Themes | Six theme presets, a palette generator for tone, dark mode style, and contrast, and contrast checks. |
 | Button variants | `raised` (a gradient surface button), `soft`, and `magic`. |
 | Button feel | Buttons scale down slightly when pressed, unless reduced motion is on. |
 | Fonts | TikTok Sans for text and Geist Mono for code. Set `--font-body` for text and `--font-display` for headings. |
@@ -145,7 +158,8 @@ This command replaces `src/components/ui/button.tsx`. Use `git diff` to restore 
 | `src/components/ui/` | The 55 Coss component files. |
 | `src/components/p-*.tsx` | The 508 Coss examples that the showcase displays. |
 | `src/showcase/` | The showcase site: top bar, theme settings, and example cards. |
-| `src/index.css` | The Project UI theme. This file is the source of truth. |
+| `src/palette.ts` | The palette generator. This file is the source of truth for colours. |
+| `src/index.css` | The theme: fonts, Tailwind tokens, and the generated default palette. |
 | `src/motion.css` | Motion tokens, presets, and component animations. |
 | `public/r/` | The built registry files that other projects install from. |
 | `.agents/skills/` | Coss guides for coding agents. |

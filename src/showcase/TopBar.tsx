@@ -1,10 +1,12 @@
 import { CopyIcon, MonitorIcon, MoonIcon, RotateCcwIcon, SunIcon } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
+  SelectGroup,
+  SelectGroupLabel,
   SelectItem,
   SelectPopup,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -13,169 +15,80 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { toastManager } from "@/components/ui/toast";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
-import { CustomColour } from "./CustomColour";
-import {
-  brandPresets,
-  customBrand,
-  fontFor,
-  fonts,
-  headingFonts,
-  type Mode,
-  type MotionPreset,
-  motionPresets,
-  radiusOptions,
-  type ThemeSettings,
-  themeCss,
-} from "./theme";
+import { CustomisePanel } from "./CustomisePanel";
+import { SaveThemeMenu } from "./SaveThemeMenu";
+import { type Mode, type ThemeController, themeCss, themeOf, themePresets } from "./theme";
 
-const brandItems = [
-  ...brandPresets.map(({ id, label }) => ({ label, value: id })),
-  { label: "Custom", value: customBrand },
-];
+const unsaved = "unsaved";
 
-type TopBarProps = {
-  settings: ThemeSettings;
-  update: (patch: Partial<ThemeSettings>) => void;
-  reset: () => void;
-};
+export function TopBar(controller: ThemeController) {
+  const { active, apply, reset, saved, settings, update } = controller;
+  const themes = [...themePresets, ...saved];
+  const items = [
+    ...themes.map(({ id, label }) => ({ label, value: id })),
+    { label: "Unsaved changes", value: unsaved },
+  ];
 
-export function TopBar({ settings, update, reset }: TopBarProps) {
-  const [pickerOpen, setPickerOpen] = useState(false);
   const copyTheme = async () => {
-    await navigator.clipboard.writeText(themeCss(settings));
+    await navigator.clipboard.writeText(themeCss(themeOf(settings)));
     toastManager.add({
-      description: "Paste it after the Project UI theme in your CSS.",
+      description: "It includes light and dark colours, fonts, corners, and motion.",
       title: "Theme CSS copied",
       type: "success",
     });
   };
 
   return (
-    <header className="sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b py-2 bg-background/80 px-3 backdrop-blur-md">
+    <header className="sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-md">
       <SidebarTrigger />
       <Separator className="mx-1 h-5" orientation="vertical" />
 
       <div className="ms-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
         <Select
-          items={brandItems}
-          onValueChange={(brand) => {
-            if (!brand) return;
-            update({ brand });
-            if (brand === customBrand) setPickerOpen(true);
+          items={items}
+          onValueChange={(id, details) => {
+            // Only follow choices the user made, not Select reacting to the list changing.
+            if (details.reason !== "item-press" && details.reason !== "list-navigation") return;
+            const theme = themes.find((item) => item.id === id);
+            if (theme) apply(theme.theme);
           }}
-          value={settings.brand}
+          value={active?.id ?? unsaved}
         >
-          <SelectTrigger aria-label="Brand colour" className="w-40" size="sm">
-            <span className="text-muted-foreground">Colour</span>
-            <span className="size-3 shrink-0 rounded-full bg-brand" />
+          <SelectTrigger aria-label="Theme" className="w-52" size="sm">
+            <span className="text-muted-foreground">Theme</span>
             <SelectValue className="flex-1" />
           </SelectTrigger>
           <SelectPopup>
-            {brandPresets.map((preset) => (
-              <SelectItem key={preset.id} value={preset.id}>
-                <span
-                  className="size-3 shrink-0 rounded-full"
-                  style={{
-                    background: `oklch(57.92% ${preset.chroma} ${preset.hue})`,
-                  }}
-                />
-                {preset.label}
-              </SelectItem>
-            ))}
-            <SelectItem value={customBrand}>
-              <span
-                className="size-3 shrink-0 rounded-full"
-                style={{ background: settings.customHex }}
-              />
-              Custom
+            <SelectGroup>
+              <SelectGroupLabel>Presets</SelectGroupLabel>
+              {themePresets.map((theme) => (
+                <SelectItem key={theme.id} value={theme.id}>
+                  {theme.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            {saved.length > 0 && (
+              <>
+                <SelectSeparator />
+                <SelectGroup>
+                  <SelectGroupLabel>Saved</SelectGroupLabel>
+                  {saved.map((theme) => (
+                    <SelectItem key={theme.id} value={theme.id}>
+                      {theme.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </>
+            )}
+            {/* Always mounted: removing the selected item makes Select pick another value. */}
+            <SelectSeparator className={active ? "hidden" : undefined} />
+            <SelectItem className={active ? "hidden" : undefined} disabled value={unsaved}>
+              Unsaved changes
             </SelectItem>
           </SelectPopup>
         </Select>
 
-        {settings.brand === customBrand && (
-          <CustomColour
-            hex={settings.customHex}
-            onChange={(customHex) => update({ customHex })}
-            onOpenChange={setPickerOpen}
-            open={pickerOpen}
-          />
-        )}
-
-        <Select
-          items={radiusOptions}
-          onValueChange={(radius) => radius && update({ radius })}
-          value={settings.radius}
-        >
-          <SelectTrigger aria-label="Corner radius" className="w-32" size="sm">
-            <span className="text-muted-foreground">Radius</span>
-            <SelectValue className="flex-1" />
-          </SelectTrigger>
-          <SelectPopup>
-            {radiusOptions.map(({ label, value }) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectPopup>
-        </Select>
-
-        <Select
-          items={fonts}
-          onValueChange={(font) => font && update({ font })}
-          value={settings.font}
-        >
-          <SelectTrigger aria-label="Body font" className="w-44" size="sm">
-            <span className="text-muted-foreground">Font</span>
-            <SelectValue className="flex-1" />
-          </SelectTrigger>
-          <SelectPopup>
-            {fonts.map(({ family, label, value }) => (
-              <SelectItem key={value} style={{ fontFamily: family }} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectPopup>
-        </Select>
-
-        <Select
-          items={headingFonts}
-          onValueChange={(heading) => heading && update({ heading })}
-          value={settings.heading}
-        >
-          <SelectTrigger aria-label="Heading font" className="w-52" size="sm">
-            <span className="text-muted-foreground">Headings</span>
-            <SelectValue className="flex-1" />
-          </SelectTrigger>
-          <SelectPopup>
-            {headingFonts.map(({ label, value }) => (
-              <SelectItem
-                key={value}
-                style={{ fontFamily: fonts.some((font) => font.value === value) ? fontFor(value).family : undefined }}
-                value={value}
-              >
-                {label}
-              </SelectItem>
-            ))}
-          </SelectPopup>
-        </Select>
-
-        <Select
-          items={motionPresets}
-          onValueChange={(motion) => motion && update({ motion: motion as MotionPreset })}
-          value={settings.motion}
-        >
-          <SelectTrigger aria-label="Motion" className="w-36" size="sm">
-            <span className="text-muted-foreground">Motion</span>
-            <SelectValue className="flex-1" />
-          </SelectTrigger>
-          <SelectPopup>
-            {motionPresets.map(({ label, value }) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectPopup>
-        </Select>
+        <CustomisePanel settings={settings} update={update} />
 
         <ToggleGroup
           aria-label="Colour mode"
@@ -195,6 +108,8 @@ export function TopBar({ settings, update, reset }: TopBarProps) {
           </ToggleGroupItem>
         </ToggleGroup>
 
+        <SaveThemeMenu {...controller} />
+
         <Tooltip>
           <TooltipTrigger
             render={
@@ -203,7 +118,7 @@ export function TopBar({ settings, update, reset }: TopBarProps) {
           >
             <RotateCcwIcon />
           </TooltipTrigger>
-          <TooltipPopup>Reset to defaults</TooltipPopup>
+          <TooltipPopup>Reset to the Project theme</TooltipPopup>
         </Tooltip>
 
         <Button onClick={copyTheme} size="sm" variant="raised">

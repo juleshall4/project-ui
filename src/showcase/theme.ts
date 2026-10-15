@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
+import {
+  type Brand,
+  type Contrast,
+  type DarkStyle,
+  defaultPalette,
+  type PaletteInput,
+  paletteCss,
+  type Tone,
+} from "@/palette";
 
 export type Mode = "light" | "dark" | "system";
 
-export type BrandPreset = {
-  id: string;
-  label: string;
-  hue: number;
-  chroma: number;
-};
+export type BrandPreset = Brand & { id: string; label: string };
 
 export const customBrand = "custom";
-const defaultLightness = 0.5792;
-
-export type Brand = { lightness: number; hue: number; chroma: number };
 
 /** Parses #rgb or #rrggbb. Returns undefined for anything else. */
 export function parseHex(value: string): string | undefined {
@@ -43,20 +44,14 @@ export function hexToBrand(hex: string): Brand {
   };
 }
 
-/** Light brand colours need dark text on top to stay readable. */
-export function needsDarkText(brand: Brand): boolean {
-  return brand.lightness > 0.72;
-}
-
-const darkText = "oklch(0.2 0 0)";
-
+/** Brand colours, each tuned so white text on buttons passes WCAG AA. */
 export const brandPresets: BrandPreset[] = [
-  { chroma: 0.2293, hue: 260.2, id: "cobalt", label: "Cobalt" },
-  { chroma: 0.2378, hue: 292.5, id: "violet", label: "Violet" },
-  { chroma: 0.16, hue: 162, id: "emerald", label: "Emerald" },
-  { chroma: 0.19, hue: 45, id: "ember", label: "Ember" },
-  { chroma: 0.21, hue: 12, id: "rose", label: "Rose" },
-  { chroma: 0.02, hue: 260, id: "graphite", label: "Graphite" },
+  { ...defaultPalette.brand, id: "cobalt", label: "Cobalt" },
+  { chroma: 0.2378, hue: 292.5, id: "violet", label: "Violet", lightness: 0.56 },
+  { chroma: 0.15, hue: 162, id: "emerald", label: "Emerald", lightness: 0.5 },
+  { chroma: 0.19, hue: 45, id: "ember", label: "Ember", lightness: 0.56 },
+  { chroma: 0.21, hue: 12, id: "rose", label: "Rose", lightness: 0.56 },
+  { chroma: 0.02, hue: 260, id: "graphite", label: "Graphite", lightness: 0.56 },
 ];
 
 export const radiusOptions = [
@@ -104,91 +99,198 @@ function stack(font: Font): string {
   return `'${font.family}', ui-sans-serif, system-ui, sans-serif`;
 }
 
-export type ThemeSettings = {
-  mode: Mode;
+/** Everything that makes up a theme. Light or dark viewing mode is separate. */
+export type Theme = {
   brand: string;
+  customHex: string;
+  tone: Tone;
+  darkStyle: DarkStyle;
+  contrast: Contrast;
   radius: string;
   font: string;
   heading: string;
   motion: MotionPreset;
-  customHex: string;
 };
 
-const defaults: ThemeSettings = {
+export type ThemeSettings = Theme & { mode: Mode };
+
+const projectTheme: Theme = {
   brand: "cobalt",
+  contrast: defaultPalette.contrast,
+  customHex: "#ff5a1f",
+  darkStyle: defaultPalette.darkStyle,
   font: "tiktok-sans",
   heading: sameAsBody,
   motion: "snappy",
-  customHex: "#ff5a1f",
-  mode: "system",
   radius: "0.625rem",
+  tone: defaultPalette.tone,
 };
 
-const storageKey = "project-ui-theme";
+export type NamedTheme = { id: string; label: string; description: string; theme: Theme };
 
-function readSettings(): ThemeSettings {
+export const themePresets: NamedTheme[] = [
+  {
+    description: "Cobalt, cool greys, and a crisp feel. The default.",
+    id: "project",
+    label: "Project",
+    theme: projectTheme,
+  },
+  {
+    description: "Warm paper tones, rounded corners, and calm motion.",
+    id: "paper",
+    label: "Paper",
+    theme: {
+      ...projectTheme,
+      brand: "ember",
+      font: "figtree",
+      heading: "bricolage-grotesque",
+      motion: "smooth",
+      radius: "0.875rem",
+      tone: "warm",
+    },
+  },
+  {
+    description: "Violet on true black with strong contrast.",
+    id: "midnight",
+    label: "Midnight",
+    theme: {
+      ...projectTheme,
+      brand: "violet",
+      contrast: "crisp",
+      darkStyle: "black",
+      font: "geist",
+    },
+  },
+  {
+    description: "Green-tinted surfaces, soft shapes, and smooth motion.",
+    id: "forest",
+    label: "Forest",
+    theme: {
+      ...projectTheme,
+      brand: "emerald",
+      darkStyle: "deep",
+      font: "manrope",
+      motion: "smooth",
+      radius: "1.25rem",
+      tone: "brand",
+    },
+  },
+  {
+    description: "Greyscale, sharp corners, and no motion.",
+    id: "mono",
+    label: "Mono",
+    theme: {
+      ...projectTheme,
+      brand: "graphite",
+      contrast: "crisp",
+      darkStyle: "black",
+      font: "inter",
+      heading: "space-grotesk",
+      motion: "off",
+      radius: "0.375rem",
+      tone: "neutral",
+    },
+  },
+  {
+    description: "Rose-tinted, round, and bouncy.",
+    id: "candy",
+    label: "Candy",
+    theme: {
+      ...projectTheme,
+      brand: "rose",
+      font: "onest",
+      heading: "bricolage-grotesque",
+      motion: "springy",
+      radius: "1.25rem",
+      tone: "brand",
+    },
+  },
+];
+
+const defaults: ThemeSettings = { ...projectTheme, mode: "system" };
+
+const storageKey = "project-ui-theme";
+const savedKey = "project-ui-saved-themes";
+
+function read<T>(key: string, fallback: T): T {
   try {
-    const saved = localStorage.getItem(storageKey);
-    return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+    const saved = localStorage.getItem(key);
+    return saved ? (JSON.parse(saved) as T) : fallback;
   } catch {
-    return defaults;
+    return fallback;
   }
 }
 
-export function brandFor(settings: ThemeSettings): Brand {
-  if (settings.brand === customBrand) return hexToBrand(settings.customHex);
-  const preset = brandPresets.find(({ id }) => id === settings.brand) ?? brandPresets[0];
-  return { chroma: preset.chroma, hue: preset.hue, lightness: defaultLightness };
+export function themeOf({ mode: _mode, ...theme }: ThemeSettings): Theme {
+  return theme;
 }
 
-/** Returns the CSS for the current settings, including any extra font imports. */
-export function themeCss(settings: ThemeSettings): string {
-  const brand = brandFor(settings);
-  const body = fontFor(settings.font);
-  const heading = settings.heading === sameAsBody ? undefined : fontFor(settings.heading);
+const sameTheme = (a: Theme, b: Theme) =>
+  (Object.keys(projectTheme) as (keyof Theme)[]).every(
+    (key) => key === "customHex" ? a.brand !== customBrand || a[key] === b[key] : a[key] === b[key],
+  );
+
+export function brandFor(theme: Theme): Brand {
+  if (theme.brand === customBrand) return hexToBrand(theme.customHex);
+  return brandPresets.find(({ id }) => id === theme.brand) ?? brandPresets[0];
+}
+
+export function paletteFor(theme: Theme): PaletteInput {
+  return {
+    brand: brandFor(theme),
+    contrast: theme.contrast,
+    darkStyle: theme.darkStyle,
+    tone: theme.tone,
+  };
+}
+
+function fontTokens(theme: Theme): Record<string, string> {
+  const tokens: Record<string, string> = {
+    "--font-body": stack(fontFor(theme.font)),
+    "--radius": theme.radius,
+  };
+  tokens["--font-display"] =
+    theme.heading === sameAsBody ? "var(--font-body)" : stack(fontFor(theme.heading));
+  return tokens;
+}
+
+/** The full CSS for a theme: font imports, light and dark tokens, and motion. */
+export function themeCss(theme: Theme): string {
+  const body = fontFor(theme.font);
+  const heading = theme.heading === sameAsBody ? undefined : fontFor(theme.heading);
   const imports = [...new Set([body, heading])]
     .filter((font): font is Font => font !== undefined && font.value !== fonts[0].value)
     .map((font) => `@import "@fontsource-variable/${font.value}";\n`)
     .join("");
-  const lines = [
-    `  --brand-l: ${brand.lightness};`,
-    `  --brand-h: ${brand.hue};`,
-    `  --brand-c: ${brand.chroma};`,
-    `  --radius: ${settings.radius};`,
-    `  --font-body: ${stack(body)};`,
-  ];
-  if (needsDarkText(brand)) lines.push(`  --brand-foreground: ${darkText};`);
-  if (heading) lines.push(`  --font-display: ${stack(heading)};`);
   const motion =
-    settings.motion === "snappy"
+    theme.motion === "snappy"
       ? ""
-      : `\n/* Motion: add data-motion="${settings.motion}" to the <html> element. */\n`;
-  return `${imports}${imports ? "\n" : ""}:root {\n${lines.join("\n")}\n}\n${motion}`;
+      : `\n/* Motion: add data-motion="${theme.motion}" to the <html> element. */\n`;
+  return `${imports}${imports ? "\n" : ""}${paletteCss(paletteFor(theme), fontTokens(theme))}${motion}`;
 }
 
 export function useThemeSettings() {
-  const [settings, setSettings] = useState<ThemeSettings>(readSettings);
+  const [settings, setSettings] = useState<ThemeSettings>(() => ({
+    ...defaults,
+    ...read<Partial<ThemeSettings>>(storageKey, {}),
+  }));
+  const [saved, setSaved] = useState<NamedTheme[]>(() => read(savedKey, []));
 
   useEffect(() => {
-    const root = document.documentElement;
-    const brand = brandFor(settings);
-    root.style.setProperty("--brand-l", String(brand.lightness));
-    root.style.setProperty("--brand-h", String(brand.hue));
-    root.style.setProperty("--brand-c", String(brand.chroma));
-    root.style.setProperty("--radius", settings.radius);
-    if (needsDarkText(brand)) {
-      root.style.setProperty("--brand-foreground", darkText);
-    } else {
-      root.style.removeProperty("--brand-foreground");
+    const theme = themeOf(settings);
+    let style = document.getElementById("project-ui-theme");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "project-ui-theme";
+      document.head.append(style);
     }
-    root.style.setProperty("--font-body", stack(fontFor(settings.font)));
-    if (settings.heading === sameAsBody) {
-      root.style.removeProperty("--font-display");
-    } else {
-      root.style.setProperty("--font-display", stack(fontFor(settings.heading)));
-    }
+    style.textContent = paletteCss(paletteFor(theme), fontTokens(theme));
     localStorage.setItem(storageKey, JSON.stringify(settings));
   }, [settings]);
+
+  useEffect(() => {
+    localStorage.setItem(savedKey, JSON.stringify(saved));
+  }, [saved]);
 
   useEffect(() => {
     if (settings.motion === "snappy") {
@@ -201,8 +303,7 @@ export function useThemeSettings() {
   useEffect(() => {
     const query = window.matchMedia("(prefers-color-scheme: dark)");
     const apply = () => {
-      const dark =
-        settings.mode === "dark" || (settings.mode === "system" && query.matches);
+      const dark = settings.mode === "dark" || (settings.mode === "system" && query.matches);
       document.documentElement.classList.toggle("dark", dark);
       document.documentElement.style.colorScheme = dark ? "dark" : "light";
     };
@@ -214,5 +315,28 @@ export function useThemeSettings() {
   const update = (patch: Partial<ThemeSettings>) =>
     setSettings((current) => ({ ...current, ...patch }));
 
-  return { reset: () => setSettings(defaults), settings, update };
+  const current = themeOf(settings);
+  const active = [...themePresets, ...saved].find(({ theme }) => sameTheme(theme, current));
+
+  return {
+    active,
+    apply: (theme: Theme) => update(theme),
+    deleteSaved: (id: string) => setSaved((list) => list.filter((item) => item.id !== id)),
+    reset: () => setSettings((current) => ({ ...current, ...projectTheme })),
+    save: (label: string) => {
+      const entry: NamedTheme = {
+        description: "Saved theme",
+        id: `saved-${Date.now()}`,
+        label,
+        theme: current,
+      };
+      setSaved((list) => [...list, entry]);
+      return entry;
+    },
+    saved,
+    settings,
+    update,
+  };
 }
+
+export type ThemeController = ReturnType<typeof useThemeSettings>;

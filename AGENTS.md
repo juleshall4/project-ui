@@ -8,7 +8,7 @@ Read `.agents/skills/coss/SKILL.md` and `.agents/skills/coss-particles/SKILL.md`
 
 ### Theme
 
-`src/index.css` is the source of truth for the theme, and `src/motion.css` for motion. After changing either, or `src/components/ui/button.tsx`, run `bun run registry` and commit `registry.json` and `public/r/`.
+`src/palette.ts` is the source of truth for colours, `src/index.css` for the rest of the theme, and `src/motion.css` for motion. Do not edit the generated `:root` and `.dark` blocks in `src/index.css`; change `src/palette.ts` and run `bun run registry`. After changing either, or `src/components/ui/button.tsx`, run `bun run registry` and commit `registry.json` and `public/r/`.
 
 Do not edit Coss particle files (`src/components/p-*.tsx`). Shim framework-specific imports in `vite.config.ts` instead.
 

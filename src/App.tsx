@@ -23,7 +23,7 @@ import {
 } from "@/showcase/catalog";
 import { Foundations } from "@/showcase/Foundations";
 import { ParticleCard } from "@/showcase/ParticleCard";
-import { useThemeSettings } from "@/showcase/theme";
+import { themeOf, useThemeSettings } from "@/showcase/theme";
 import { TopBar } from "@/showcase/TopBar";
 
 const foundations = "foundations";
@@ -138,7 +138,7 @@ export default function App() {
               ))}
             </div>
           ) : (
-            <Foundations />
+            <Foundations theme={themeOf(theme.settings)} />
           )}
         </main>
       </SidebarInset>

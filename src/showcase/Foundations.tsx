@@ -1,8 +1,18 @@
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { contrastReport, minimumContrast } from "@/palette";
 import { componentGroups, type Particle } from "./catalog";
 import { ParticleCard } from "./ParticleCard";
+import { paletteFor, type Theme } from "./theme";
 
 const swatches = [
   ["brand", "bg-brand"],
@@ -68,7 +78,19 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export function Foundations() {
+function Ratio({ value }: { value: number }) {
+  const passes = value >= minimumContrast;
+  return (
+    <span className="inline-flex items-center gap-2 tabular-nums">
+      {value.toFixed(2)}:1
+      <Badge variant={passes ? "success" : "error"}>{passes ? "Pass" : "Fail"}</Badge>
+    </span>
+  );
+}
+
+export function Foundations({ theme }: { theme: Theme }) {
+  const report = contrastReport(paletteFor(theme));
+
   return (
     <div className="space-y-12">
       <Section title="Colours">
@@ -79,6 +101,37 @@ export function Foundations() {
               <code className="block px-3 py-2 text-muted-foreground text-xs">{name}</code>
             </div>
           ))}
+        </div>
+      </Section>
+
+      <Section title="Readability">
+        <p className="max-w-prose text-muted-foreground text-sm">
+          Contrast between each text colour and the surface it sits on, for the current theme.
+          Normal text needs at least {minimumContrast}:1 to pass WCAG AA.
+        </p>
+        <div className="overflow-hidden rounded-xl border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Text</TableHead>
+                <TableHead>Light mode</TableHead>
+                <TableHead>Dark mode</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {report.map((row) => (
+                <TableRow key={row.label}>
+                  <TableCell className="font-medium">{row.label}</TableCell>
+                  <TableCell>
+                    <Ratio value={row.light} />
+                  </TableCell>
+                  <TableCell>
+                    <Ratio value={row.dark} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </Section>
 
