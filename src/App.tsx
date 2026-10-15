@@ -24,7 +24,7 @@ import {
 import { Foundations } from "@/showcase/Foundations";
 import { ParticleCard } from "@/showcase/ParticleCard";
 import { themeOf, useThemeSettings } from "@/showcase/theme";
-import { TopBar } from "@/showcase/TopBar";
+import { Workspace } from "@/showcase/Workspace";
 
 const foundations = "foundations";
 
@@ -119,28 +119,29 @@ export default function App() {
       </Sidebar>
 
       <SidebarInset className="min-w-0">
-        <TopBar {...theme} />
-        <main className="mx-auto w-full max-w-7xl space-y-8 px-6 py-10">
-          <div className="space-y-2">
-            <h1 className="font-heading font-semibold text-3xl tracking-tight">
-              {group ? group.title : "Foundations"}
-            </h1>
-            <p className="text-muted-foreground">
-              {group
-                ? `${group.particles.length} ${group.particles.length === 1 ? "example" : "examples"} built with the ${group.title} component.`
-                : `Colours, buttons, and type for ${componentGroups.length} Coss components and ${particleCount} examples.`}
-            </p>
-          </div>
-          {group ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4">
-              {group.particles.map((particle) => (
-                <ParticleCard key={particle.name} particle={particle} />
-              ))}
+        <Workspace theme={theme}>
+          <div className="mx-auto w-full max-w-7xl space-y-8 px-6 py-10">
+            <div className="space-y-2">
+              <h1 className="font-heading font-semibold text-3xl tracking-tight">
+                {group ? group.title : "Foundations"}
+              </h1>
+              <p className="text-muted-foreground">
+                {group
+                  ? `${group.particles.length} ${group.particles.length === 1 ? "example" : "examples"} built with the ${group.title} component.`
+                  : `Colours, buttons, and type for ${componentGroups.length} Coss components and ${particleCount} examples.`}
+              </p>
             </div>
-          ) : (
-            <Foundations theme={themeOf(theme.settings)} />
-          )}
-        </main>
+            {group ? (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4">
+                {group.particles.map((particle) => (
+                  <ParticleCard key={particle.name} particle={particle} />
+                ))}
+              </div>
+            ) : (
+              <Foundations theme={themeOf(theme.settings)} />
+            )}
+          </div>
+        </Workspace>
       </SidebarInset>
     </SidebarProvider>
   );

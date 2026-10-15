@@ -1,4 +1,12 @@
-import { CopyIcon, MonitorIcon, MoonIcon, RotateCcwIcon, SunIcon } from "lucide-react";
+import {
+  CopyIcon,
+  MonitorIcon,
+  MoonIcon,
+  PanelLeftIcon,
+  RotateCcwIcon,
+  SlidersHorizontalIcon,
+  SunIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,17 +19,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { toastManager } from "@/components/ui/toast";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
-import { CustomisePanel } from "./CustomisePanel";
+import { CustomiseButton } from "./CustomisePanel";
 import { SaveThemeMenu } from "./SaveThemeMenu";
 import { type Mode, type ThemeController, themeCss, themeOf, themePresets } from "./theme";
 
 const unsaved = "unsaved";
 
-export function TopBar(controller: ThemeController) {
+type TopBarProps = ThemeController & {
+  /** Toggles the left navigation, which lives in a different sidebar provider. */
+  onToggleNavigation: () => void;
+};
+
+export function TopBar({ onToggleNavigation, ...controller }: TopBarProps) {
   const { active, apply, reset, saved, settings, update } = controller;
   const themes = [...themePresets, ...saved];
   const items = [
@@ -40,7 +52,15 @@ export function TopBar(controller: ThemeController) {
 
   return (
     <header className="sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-md">
-      <SidebarTrigger />
+      <Button
+        aria-label="Toggle navigation"
+        className="size-7"
+        onClick={onToggleNavigation}
+        size="icon"
+        variant="ghost"
+      >
+        <PanelLeftIcon />
+      </Button>
       <Separator className="mx-1 h-5" orientation="vertical" />
 
       <div className="ms-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
@@ -88,7 +108,10 @@ export function TopBar(controller: ThemeController) {
           </SelectPopup>
         </Select>
 
-        <CustomisePanel settings={settings} update={update} />
+        <CustomiseButton>
+          <SlidersHorizontalIcon />
+          Customise
+        </CustomiseButton>
 
         <ToggleGroup
           aria-label="Colour mode"

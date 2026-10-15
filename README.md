@@ -12,7 +12,7 @@ bun run dev
 Open the local URL that Vite prints. The top bar has the following controls:
 
 - **Theme:** Choose a complete look. The presets are Project (the default), Paper, Midnight, Forest, Mono, and Candy. Your saved themes appear under **Saved**.
-- **Customise:** Opens a panel with every setting:
+- **Customise:** Opens a panel on the right with every setting. On wide screens it docks beside the page, so you can see changes as you make them; on small screens it slides over the page. The panel is a Coss Sidebar with `side="right"`.
   - **Brand colour:** Cobalt, Violet, Emerald, Ember, Rose, Graphite, or Custom. Custom shows a colour picker and a hex field, such as `#ff5a1f`.
   - **Tone of the greys:** Neutral, Cool, Warm, or Brand, which tints surfaces with the brand colour.
   - **Dark mode:** Dim (charcoal), Deep (near-black), or Black (true black).
