@@ -1,9 +1,6 @@
 import {
-  CopyIcon,
-  MonitorIcon,
   MoonIcon,
   PanelLeftIcon,
-  RotateCcwIcon,
   SlidersHorizontalIcon,
   SunIcon,
 } from "lucide-react";
@@ -19,12 +16,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { toastManager } from "@/components/ui/toast";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { CustomiseButton } from "./CustomisePanel";
 import { SaveThemeMenu } from "./SaveThemeMenu";
-import { type Mode, type ThemeController, themeCss, themeOf, themePresets } from "./theme";
+import { ThemeTransfer } from "./ThemeTransfer";
+import { type ThemeController, themePresets } from "./theme";
 
 const unsaved = "unsaved";
 
@@ -34,22 +31,15 @@ type TopBarProps = ThemeController & {
 };
 
 export function TopBar({ onToggleNavigation, ...controller }: TopBarProps) {
-  const { active, apply, reset, saved, settings, update } = controller;
+  const { active, apply, saved, settings, update } = controller;
+  const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const dark = settings.mode === "dark" || (settings.mode === "system" && systemDark);
+  const modeLabel = dark ? "Switch to light mode" : "Switch to dark mode";
   const themes = [...themePresets, ...saved];
   const items = [
     ...themes.map(({ id, label }) => ({ label, value: id })),
     { label: "Unsaved changes", value: unsaved },
   ];
-
-  const copyTheme = async () => {
-    const prompt = "Apply this Project UI theme to the app. Use https://github.com/juleshall4/project-ui as the source of truth: update the shared UI components and base styles from its source files, install required dependencies, then merge the CSS below for the selected theme. Follow the included motion preset, preserve app functionality, and check the build.";
-    await navigator.clipboard.writeText(`/* ${prompt} */\n\n${themeCss(themeOf(settings))}`);
-    toastManager.add({
-      description: "Includes the theme CSS and a short prompt to apply Project UI.",
-      title: "Theme and prompt copied",
-      type: "success",
-    });
-  };
 
   return (
     <header className="sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-md">
@@ -114,41 +104,25 @@ export function TopBar({ onToggleNavigation, ...controller }: TopBarProps) {
           Customise
         </CustomiseButton>
 
-        <ToggleGroup
-          aria-label="Colour mode"
-          onValueChange={([mode]) => mode && update({ mode: mode as Mode })}
-          size="sm"
-          value={[settings.mode]}
-          variant="outline"
-        >
-          <ToggleGroupItem aria-label="Light mode" value="light">
-            <SunIcon />
-          </ToggleGroupItem>
-          <ToggleGroupItem aria-label="System mode" value="system">
-            <MonitorIcon />
-          </ToggleGroupItem>
-          <ToggleGroupItem aria-label="Dark mode" value="dark">
-            <MoonIcon />
-          </ToggleGroupItem>
-        </ToggleGroup>
-
-        <SaveThemeMenu {...controller} />
-
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button aria-label="Reset theme" onClick={reset} size="icon-sm" variant="ghost" />
+              <Button
+                aria-label={modeLabel}
+                onClick={() => update({ mode: dark ? "light" : "dark" })}
+                size="icon-sm"
+                variant="ghost"
+              />
             }
           >
-            <RotateCcwIcon />
+            {dark ? <SunIcon /> : <MoonIcon />}
           </TooltipTrigger>
-          <TooltipPopup>Reset to the Project theme</TooltipPopup>
+          <TooltipPopup>{modeLabel}</TooltipPopup>
         </Tooltip>
 
-        <Button onClick={copyTheme} size="sm" variant="raised">
-          <CopyIcon />
-          Copy theme
-        </Button>
+        <SaveThemeMenu {...controller} />
+
+        <ThemeTransfer {...controller} />
       </div>
     </header>
   );

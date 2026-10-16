@@ -239,7 +239,7 @@ function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
   const text = (l: number): Oklch => ({ c: t.text, h: t.hue, l });
   const line = (alpha: number): Oklch => ({ alpha, c: t.text, h: t.hue, l: 0.98 });
 
-  const brandColour: Oklch = { c: brand.chroma * 0.853, h: brand.hue, l: brand.lightness - 0.011 };
+  const brandColour: Oklch = { c: brand.chroma, h: brand.hue, l: brand.lightness };
   const values: Record<string, Oklch> = {
     background: surface(d.page),
     card: surface(d.card),
@@ -271,7 +271,7 @@ function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
   );
 
   const tokens: Record<string, string> = {
-    "--brand": "oklch(calc(var(--brand-l) - 0.011) calc(var(--brand-c) * 0.853) var(--brand-h))",
+    "--brand": "oklch(var(--brand-l) var(--brand-c) var(--brand-h))",
     "--brand-foreground": format(values["brand-foreground"]),
     "--brand-soft": "oklch(0.3241 calc(var(--brand-c) * 0.357) var(--brand-h))",
     "--brand-soft-foreground": `oklch(${values["brand-soft-foreground"].l} calc(var(--brand-c) * 0.337) var(--brand-h))`,

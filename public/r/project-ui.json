@@ -156,7 +156,7 @@
       "sidebar-ring": "var(--ring)"
     },
     "dark": {
-      "brand": "oklch(calc(var(--brand-l) - 0.011) calc(var(--brand-c) * 0.853) var(--brand-h))",
+      "brand": "oklch(var(--brand-l) var(--brand-c) var(--brand-h))",
       "brand-foreground": "oklch(1 0 0)",
       "brand-soft": "oklch(0.3241 calc(var(--brand-c) * 0.357) var(--brand-h))",
       "brand-soft-foreground": "oklch(0.8389 calc(var(--brand-c) * 0.337) var(--brand-h))",
