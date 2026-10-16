@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { contrastReport, contrasts, darkStyles, minimumContrast, tones } from "@/palette";
 import { CustomColour } from "./CustomColour";
 import { Segmented } from "./Segmented";
@@ -118,6 +119,20 @@ export function CustomiseControls({
         {settings.brand === customBrand && (
           <CustomColour hex={settings.customHex} onChange={(customHex) => update({ customHex })} />
         )}
+      </Group>
+
+      <Group title="Button opacity">
+        <div className="flex justify-end text-muted-foreground text-xs tabular-nums">
+          {settings.buttonOpacity}%
+        </div>
+        <Slider
+          getAriaLabel={() => "Button opacity"}
+          max={100}
+          min={0}
+          onValueChange={(value) => update({ buttonOpacity: Array.isArray(value) ? value[0] : value })}
+          step={5}
+          value={settings.buttonOpacity}
+        />
       </Group>
 
       <Group title="Tone of the greys">

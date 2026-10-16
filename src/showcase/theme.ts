@@ -102,6 +102,7 @@ function stack(font: Font): string {
 /** Everything that makes up a theme. Light or dark viewing mode is separate. */
 export type Theme = {
   brand: string;
+  buttonOpacity: number;
   customHex: string;
   tone: Tone;
   darkStyle: DarkStyle;
@@ -116,6 +117,7 @@ export type ThemeSettings = Theme & { mode: Mode };
 
 const projectTheme: Theme = {
   brand: "cobalt",
+  buttonOpacity: 90,
   contrast: defaultPalette.contrast,
   customHex: "#ff5a1f",
   darkStyle: defaultPalette.darkStyle,
@@ -246,6 +248,7 @@ export function paletteFor(theme: Theme): PaletteInput {
 
 function fontTokens(theme: Theme): Record<string, string> {
   const tokens: Record<string, string> = {
+    "--button-opacity": `${theme.buttonOpacity}%`,
     "--font-body": stack(fontFor(theme.font)),
     "--radius": theme.radius,
   };
@@ -274,7 +277,12 @@ export function useThemeSettings() {
     ...defaults,
     ...read<Partial<ThemeSettings>>(storageKey, {}),
   }));
-  const [saved, setSaved] = useState<NamedTheme[]>(() => read(savedKey, []));
+  const [saved, setSaved] = useState<NamedTheme[]>(() =>
+    read<NamedTheme[]>(savedKey, []).map((entry) => ({
+      ...entry,
+      theme: { ...projectTheme, ...entry.theme },
+    })),
+  );
 
   useEffect(() => {
     const theme = themeOf(settings);

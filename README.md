@@ -14,6 +14,7 @@ Open the local URL that Vite prints. The top bar has the following controls:
 - **Theme:** Choose a complete look. The presets are Project (the default), Paper, Midnight, Forest, Mono, and Candy. Your saved themes appear under **Saved**.
 - **Customise:** Opens a panel on the right with every setting. On wide screens it docks beside the page, so you can see changes as you make them; on small screens it slides over the page. The panel is a Coss Sidebar with `side="right"`.
   - **Brand colour:** Cobalt, Violet, Emerald, Ember, Rose, Graphite, or Custom. Custom shows a colour picker and a hex field, such as `#ff5a1f`.
+  - **Button opacity:** Adjust coloured button fills and borders from 0% to 100%. Text and icons stay opaque. The value is saved and included in copied themes.
   - **Tone of the greys:** Neutral, Cool, Warm, or Brand, which tints surfaces with the brand colour.
   - **Dark mode:** Dim (charcoal), Deep (near-black), or Black (true black).
   - **Contrast:** Soft or Crisp. Crisp makes text, borders, and secondary text stronger.
