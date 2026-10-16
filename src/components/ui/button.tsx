@@ -31,9 +31,9 @@ export const buttonVariants = cva(
       },
       variant: {
         default:
-          "border-primary bg-primary text-primary-foreground shadow-primary/24 shadow-xs hover:bg-primary/90 data-pressed:bg-primary/90 *:data-[slot=button-loading-indicator]:text-primary-foreground [:active,[data-pressed]]:inset-shadow-[0_1px_--theme(--color-black/8%)] [:disabled,:active,[data-pressed]]:shadow-none",
+          "border-primary/90 bg-primary/90 text-primary-foreground shadow-primary/24 shadow-xs hover:bg-primary/81 data-pressed:bg-primary/81 *:data-[slot=button-loading-indicator]:text-primary-foreground [:active,[data-pressed]]:inset-shadow-[0_1px_--theme(--color-black/8%)] [:disabled,:active,[data-pressed]]:shadow-none",
         destructive:
-          "border-destructive bg-destructive text-white shadow-destructive/24 shadow-xs hover:bg-destructive/90 data-pressed:bg-destructive/90 *:data-[slot=button-loading-indicator]:text-white [:active,[data-pressed]]:inset-shadow-[0_1px_--theme(--color-black/8%)] [:disabled,:active,[data-pressed]]:shadow-none",
+          "border-destructive/90 bg-destructive/90 text-white shadow-destructive/24 shadow-xs hover:bg-destructive/81 data-pressed:bg-destructive/81 *:data-[slot=button-loading-indicator]:text-white [:active,[data-pressed]]:inset-shadow-[0_1px_--theme(--color-black/8%)] [:disabled,:active,[data-pressed]]:shadow-none",
         "destructive-outline":
           "border-input bg-popover not-dark:bg-clip-padding text-destructive-foreground shadow-xs/5 hover:border-destructive/32 hover:bg-destructive/4 data-pressed:border-destructive/32 data-pressed:bg-destructive/4 *:data-[slot=button-loading-indicator]:text-foreground dark:bg-input/32 [:disabled,:active,[data-pressed]]:shadow-none",
         ghost:
@@ -42,13 +42,13 @@ export const buttonVariants = cva(
         outline:
           "border-input bg-popover not-dark:bg-clip-padding text-foreground shadow-xs/5 hover:bg-accent/50 data-pressed:bg-accent/50 *:data-[slot=button-loading-indicator]:text-foreground dark:bg-input/32 dark:data-pressed:bg-input/64 dark:hover:bg-input/64 [:disabled,:active,[data-pressed]]:shadow-none",
         magic:
-          "border-magic bg-magic text-white shadow-magic/24 shadow-xs hover:bg-magic/90 data-pressed:bg-magic/90 *:data-[slot=button-loading-indicator]:text-white [:disabled,:active,[data-pressed]]:shadow-none",
+          "border-magic/90 bg-magic/90 text-white shadow-magic/24 shadow-xs hover:bg-magic/81 data-pressed:bg-magic/81 *:data-[slot=button-loading-indicator]:text-white [:disabled,:active,[data-pressed]]:shadow-none",
         raised:
           "border-raised-stroke bg-linear-to-b from-45% from-raised-1 via-64% via-raised-2 to-98% to-raised-3 text-foreground shadow-raised hover:inset-shadow-[0_0_0_100px_--theme(--color-black/2%)] data-pressed:inset-shadow-[0_0_0_100px_--theme(--color-black/4%)] *:data-[slot=button-loading-indicator]:text-foreground dark:hover:inset-shadow-[0_0_0_100px_--theme(--color-black/20%)] [:disabled]:shadow-none",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/90 data-pressed:bg-secondary/90 *:data-[slot=button-loading-indicator]:text-secondary-foreground [:active,[data-pressed]]:bg-secondary/80",
         soft:
-          "border-transparent bg-brand-soft text-brand-soft-foreground hover:bg-brand-soft/80 data-pressed:bg-brand-soft/80 *:data-[slot=button-loading-indicator]:text-brand-soft-foreground",
+          "border-transparent bg-brand-soft/90 text-brand-soft-foreground hover:bg-brand-soft/72 data-pressed:bg-brand-soft/72 *:data-[slot=button-loading-indicator]:text-brand-soft-foreground",
       },
     },
   },

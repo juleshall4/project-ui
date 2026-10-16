@@ -22,7 +22,7 @@ Open the local URL that Vite prints. The top bar has the following controls:
   - **Motion:** Off, Snappy, Smooth, or Springy.
 - **Mode:** Light, system, or dark. This setting only changes your view; every theme includes both light and dark colours.
 - **Saved themes** (bookmark icon): Save the current settings under a name, or delete the saved theme you're using. Saved themes stay in this browser.
-- **Copy theme:** Copies the full CSS for the current theme: font imports, every light and dark colour, corners, and motion.
+- **Copy theme:** Copies the full CSS for the current theme and a short prompt to apply it, including component borders, focus rings, and button styles.
 
 The Customise panel shows whether all text is readable. The **Readability** section on the Foundations page lists each text and background pair with its contrast ratio in light and dark mode. Normal text needs at least 4.5:1 to pass WCAG AA.
 
@@ -64,7 +64,7 @@ To copy an example's code, select the code button on its card in the showcase.
 
 ### Apply copied theme settings
 
-Paste the CSS from **Copy theme** into your project's main CSS file. Put the `@import` lines with the other imports at the top, and the `:root` block at the end. If the CSS imports a font, install its package first.
+Give the contents of **Copy theme** to your coding assistant to apply the theme and component styles. The short prompt is a CSS comment, so you can also paste the contents into your project's main CSS file. Put the `@import` lines with the other imports at the top, and the `:root` block at the end. If the CSS imports a font, install its package first. When applying the CSS manually, follow the comment's instructions to update the component styles too.
 
 For example, the following CSS changes the kit to violet with rounder corners and Manrope text:
 
