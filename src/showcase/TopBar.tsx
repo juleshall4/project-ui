@@ -42,10 +42,10 @@ export function TopBar({ onToggleNavigation, ...controller }: TopBarProps) {
   ];
 
   const copyTheme = async () => {
-    const prompt = "Apply this Project UI theme throughout the app. Use https://github.com/juleshall4/project-ui for Coss components, fonts, and motion styles; merge the selected CSS below and apply its motion preset. Use 0.75px component borders and dividers, 1px button/toggle/checkbox/radio focus rings, and 1.5px form-field/slider focus rings. Remove button edge highlights. Set primary, destructive, magic, and soft button fills to 90% opacity; match coloured borders and keep text/icons opaque. Use 81% hover/pressed fills (72% for soft). Preserve functionality and check the build.";
+    const prompt = "Apply this Project UI theme to the app. Use https://github.com/juleshall4/project-ui as the source of truth: update the shared UI components and base styles from its source files, install required dependencies, then merge the CSS below for the selected theme. Follow the included motion preset, preserve app functionality, and check the build.";
     await navigator.clipboard.writeText(`/* ${prompt} */\n\n${themeCss(themeOf(settings))}`);
     toastManager.add({
-      description: "Includes the theme CSS and a short prompt to apply the component styles.",
+      description: "Includes the theme CSS and a short prompt to apply Project UI.",
       title: "Theme and prompt copied",
       type: "success",
     });
