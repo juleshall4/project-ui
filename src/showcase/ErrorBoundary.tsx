@@ -1,4 +1,6 @@
+import { CircleAlertIcon } from "lucide-react";
 import { Component, type ReactNode } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type Props = { children: ReactNode; name: string };
 
@@ -12,9 +14,11 @@ export class ErrorBoundary extends Component<Props, { error?: Error }> {
   render() {
     if (this.state.error) {
       return (
-        <p className="text-destructive-foreground text-sm">
-          {this.props.name} failed to render: {this.state.error.message}
-        </p>
+        <Alert variant="error">
+          <CircleAlertIcon />
+          <AlertTitle>{this.props.name} failed to render</AlertTitle>
+          <AlertDescription>{this.state.error.message}</AlertDescription>
+        </Alert>
       );
     }
     return this.props.children;

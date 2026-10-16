@@ -42,12 +42,11 @@ export function TopBar({ onToggleNavigation, ...controller }: TopBarProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b bg-background/80 px-3 py-2 backdrop-blur-md">
+    <header className="sticky top-0 z-20 flex min-h-14 items-center gap-2 border-b-[0.75px] bg-page/80 px-3 py-2 backdrop-blur-md">
       <Button
         aria-label="Toggle navigation"
-        className="size-7"
         onClick={onToggleNavigation}
-        size="icon"
+        size="icon-sm"
         variant="ghost"
       >
         <PanelLeftIcon />

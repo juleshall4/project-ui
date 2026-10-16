@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Menu, MenuItem, MenuPopup, MenuTrigger } from "@/components/ui/menu";
@@ -117,11 +117,9 @@ export function ThemeTransfer({
                 </Field>
               ) : (
                 <>
-                  <Field>
+                  <Field invalid={!!error}>
                     <FieldLabel>Theme export</FieldLabel>
                     <Textarea
-                      aria-describedby={error ? "theme-import-error" : undefined}
-                      aria-invalid={!!error}
                       className="max-h-64 overflow-y-auto"
                       onChange={(event) => {
                         setSource(event.target.value);
@@ -130,6 +128,7 @@ export function ThemeTransfer({
                       placeholder="Paste your exported theme here…"
                       value={source}
                     />
+                    <FieldError match={!!error}>{error}</FieldError>
                   </Field>
                   <Field>
                     <FieldLabel>Or choose a file</FieldLabel>
@@ -152,11 +151,6 @@ export function ThemeTransfer({
                       }}
                     />
                   </Field>
-                  {error && (
-                    <p className="text-sm text-destructive" id="theme-import-error" role="alert">
-                      {error}
-                    </p>
-                  )}
                 </>
               )}
             </DialogPanel>

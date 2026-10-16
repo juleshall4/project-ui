@@ -19,7 +19,7 @@ export function CustomisePanel({ settings, update }: Pick<ThemeController, "sett
 
   return (
     <Sidebar id="customise-panel" side="right">
-      <SidebarHeader className="min-h-14 flex-row items-center justify-between gap-2 border-b px-4">
+      <SidebarHeader className="min-h-14 flex-row items-center justify-between gap-2 border-b-[0.75px] px-4">
         <div>
           <h2 className="font-heading font-semibold text-foreground text-sm">Customise theme</h2>
           <p className="text-muted-foreground text-xs">Applies to light and dark mode.</p>

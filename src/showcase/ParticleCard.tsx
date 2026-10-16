@@ -1,6 +1,8 @@
 import { CheckIcon, CodeIcon } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Particle } from "./catalog";
@@ -37,9 +39,9 @@ export function ParticleCard({ particle }: { particle: Particle }) {
   };
 
   return (
-    <figure className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-xs/5">
+    <Card className="overflow-hidden" render={<figure />}>
       <div
-        className="flex min-h-56 flex-1 items-center justify-center overflow-auto p-8"
+        className="flex min-h-56 flex-1 items-center justify-center overflow-auto bg-page p-8"
         ref={stageRef}
       >
         {near && (
@@ -50,7 +52,8 @@ export function ParticleCard({ particle }: { particle: Particle }) {
           </ErrorBoundary>
         )}
       </div>
-      <figcaption className="flex items-center justify-between border-t bg-muted/40 px-3 py-1.5">
+      <Separator />
+      <figcaption className="flex items-center justify-between px-3 py-1.5">
         <code className="text-muted-foreground text-xs">{particle.name}</code>
         <Tooltip>
           <TooltipTrigger
@@ -68,6 +71,6 @@ export function ParticleCard({ particle }: { particle: Particle }) {
           <TooltipPopup>{copied ? "Copied" : "Copy code"}</TooltipPopup>
         </Tooltip>
       </figcaption>
-    </figure>
+    </Card>
   );
 }

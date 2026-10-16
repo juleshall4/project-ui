@@ -69,7 +69,7 @@ export function SaveThemeMenu({
           <DialogHeader>
             <DialogTitle>Save theme</DialogTitle>
             <DialogDescription>
-              Saves your colours, type, corners, and motion in this browser.
+              Saves every theme setting in this browser.
             </DialogDescription>
           </DialogHeader>
           <Form
