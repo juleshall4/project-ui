@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Particle } from "./catalog";
 import { ErrorBoundary } from "./ErrorBoundary";
+import "./preview-surfaces.css";
 
 /** Becomes true once the element comes near the viewport, and stays true. */
 function useNearViewport<T extends Element>() {
@@ -41,13 +42,20 @@ export function ParticleCard({ particle }: { particle: Particle }) {
   return (
     <Card className="overflow-hidden" render={<figure />}>
       <div
-        className="flex min-h-56 flex-1 items-center justify-center overflow-auto bg-page p-8"
+        className="flex min-h-56 flex-1 items-center justify-center overflow-auto p-8"
+        data-slot="showcase-stage"
         ref={stageRef}
       >
         {near && (
           <ErrorBoundary name={particle.name}>
             <Suspense fallback={<Spinner className="text-muted-foreground" />}>
-              <Component />
+              {/^p-alert-\d+$/.test(particle.name) ? (
+                <div className="w-full rounded-xl" data-slot="showcase-alert-backing">
+                  <Component />
+                </div>
+              ) : (
+                <Component />
+              )}
             </Suspense>
           </ErrorBoundary>
         )}

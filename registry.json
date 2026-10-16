@@ -195,9 +195,33 @@
           "animation-duration": "0ms !important",
           "animation-delay": "0ms !important"
         },
-        "[data-slot=\"group\"] > :is(button, [data-slot=\"button\"])::before": {
+        ":is(button, a).inline-flex::before, [data-slot=\"group\"] > [data-slot=\"button\"]::before": {
           "position": "absolute",
           "pointer-events": "none"
+        },
+        ":is(button.inline-flex, a.inline-flex, [data-slot=\"group-text\"], [data-slot=\"tabs-tab\"]) > svg:not([class*=\"m-\"], [class*=\"mx-\"], [class*=\"ms-\"], [class*=\"me-\"], [class*=\"ml-\"], [class*=\"mr-\"])": {
+          "margin-inline": "0"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]) > :is(button, .border-input)": {
+          "background-clip": "border-box"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]):not([data-orientation=\"vertical\"]) > :is(button, .border-input)": {
+          "border-inline-width": "0.75px"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]):not([data-orientation=\"vertical\"]) > :is(button, .border-input):has(~ [data-slot])": {
+          "border-inline-end-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]):not([data-orientation=\"vertical\"]) > [data-slot] ~ :is(button, .border-input)": {
+          "border-inline-start-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"])[data-orientation=\"vertical\"] > :is(button, .border-input)": {
+          "border-block-width": "0.75px"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"])[data-orientation=\"vertical\"] > :is(button, .border-input):has(~ [data-slot])": {
+          "border-block-end-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"])[data-orientation=\"vertical\"] > [data-slot] ~ :is(button, .border-input)": {
+          "border-block-start-color": "transparent"
         },
         ":root[data-controls=\"filled\"] .border-input:not([data-slot=\"checkbox\"], [data-slot=\"radio\"], [data-slot=\"slider-thumb\"], [data-slot=\"badge\"])": {
           "background-color": "var(--field)",
@@ -205,6 +229,23 @@
         },
         ":root[data-controls=\"filled\"] .border-input:not( [data-slot=\"checkbox\"], [data-slot=\"radio\"], [data-slot=\"slider-thumb\"], [data-slot=\"badge\"], :focus-visible, :has(:focus-visible), [aria-invalid], :has([aria-invalid]) )": {
           "border-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]):has(> [data-slot=\"separator\"])": {
+          "--control-gap": "calc(var(--spacing, 0.25rem) / 2)",
+          "gap": "0"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"]": {
+          "background": "transparent",
+          "translate": "none"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"]::before": {
+          "background": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"][data-orientation=\"vertical\"]": {
+          "width": "var(--control-gap)"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"][data-orientation=\"horizontal\"]": {
+          "height": "var(--control-gap)"
         },
         ":root[data-controls=\"filled\"] .border-input:not(button, [data-slot=\"checkbox\"], [data-slot=\"radio\"], [data-slot=\"slider-thumb\"], [data-slot=\"badge\"]):is( :disabled, [data-disabled], :has(:disabled) )": {
           "opacity": "1"
@@ -286,8 +327,8 @@
           "input": "oklch(0.98 0.0065 229 / 15%)",
           "field": "oklch(0.98 0.0065 229 / 7.5%)",
           "field-hover": "oklch(0.98 0.0065 229 / 10.5%)",
-          "ring": "color-mix(in oklab, oklch(calc(var(--brand-l) + 0.16) var(--brand-c) var(--brand-h)) 64%, transparent)",
-          "focus-border": "color-mix(in oklab, oklch(calc(var(--brand-l) + 0.16) var(--brand-c) var(--brand-h)) 65%, transparent)",
+          "ring": "var(--focus-border)",
+          "focus-border": "oklch(0.4 0 0)",
           "destructive": "oklch(0.57 0.1977 28.18)",
           "destructive-foreground": "oklch(0.704 0.191 22.22)",
           "success-foreground": "oklch(0.765 0.177 163.223)",
@@ -335,8 +376,8 @@
           "input": "oklch(0.2 0.0065 229 / 10%)",
           "field": "oklch(0.2 0.0065 229 / 5%)",
           "field-hover": "oklch(0.2 0.0065 229 / 8%)",
-          "ring": "color-mix(in oklab, var(--brand) 64%, transparent)",
-          "focus-border": "color-mix(in oklab, var(--brand) 80%, transparent)",
+          "ring": "var(--focus-border)",
+          "focus-border": "oklch(0.82 0 0)",
           "destructive": "oklch(0.5788 0.2215 27.8)",
           "destructive-foreground": "oklch(0.52 0.2235 28.32)",
           "info": "var(--brand)",
@@ -666,9 +707,33 @@
           "animation-duration": "0ms !important",
           "animation-delay": "0ms !important"
         },
-        "[data-slot=\"group\"] > :is(button, [data-slot=\"button\"])::before": {
+        ":is(button, a).inline-flex::before, [data-slot=\"group\"] > [data-slot=\"button\"]::before": {
           "position": "absolute",
           "pointer-events": "none"
+        },
+        ":is(button.inline-flex, a.inline-flex, [data-slot=\"group-text\"], [data-slot=\"tabs-tab\"]) > svg:not([class*=\"m-\"], [class*=\"mx-\"], [class*=\"ms-\"], [class*=\"me-\"], [class*=\"ml-\"], [class*=\"mr-\"])": {
+          "margin-inline": "0"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]) > :is(button, .border-input)": {
+          "background-clip": "border-box"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]):not([data-orientation=\"vertical\"]) > :is(button, .border-input)": {
+          "border-inline-width": "0.75px"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]):not([data-orientation=\"vertical\"]) > :is(button, .border-input):has(~ [data-slot])": {
+          "border-inline-end-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"]):not([data-orientation=\"vertical\"]) > [data-slot] ~ :is(button, .border-input)": {
+          "border-inline-start-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"])[data-orientation=\"vertical\"] > :is(button, .border-input)": {
+          "border-block-width": "0.75px"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"])[data-orientation=\"vertical\"] > :is(button, .border-input):has(~ [data-slot])": {
+          "border-block-end-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"][data-variant=\"outline\"])[data-orientation=\"vertical\"] > [data-slot] ~ :is(button, .border-input)": {
+          "border-block-start-color": "transparent"
         },
         ":root[data-controls=\"filled\"] .border-input:not([data-slot=\"checkbox\"], [data-slot=\"radio\"], [data-slot=\"slider-thumb\"], [data-slot=\"badge\"])": {
           "background-color": "var(--field)",
@@ -676,6 +741,23 @@
         },
         ":root[data-controls=\"filled\"] .border-input:not( [data-slot=\"checkbox\"], [data-slot=\"radio\"], [data-slot=\"slider-thumb\"], [data-slot=\"badge\"], :focus-visible, :has(:focus-visible), [aria-invalid], :has([aria-invalid]) )": {
           "border-color": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]):has(> [data-slot=\"separator\"])": {
+          "--control-gap": "calc(var(--spacing, 0.25rem) / 2)",
+          "gap": "0"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"]": {
+          "background": "transparent",
+          "translate": "none"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"]::before": {
+          "background": "transparent"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"][data-orientation=\"vertical\"]": {
+          "width": "var(--control-gap)"
+        },
+        ":is([data-slot=\"group\"], [data-slot=\"toggle-group\"]) > [data-slot=\"separator\"][data-orientation=\"horizontal\"]": {
+          "height": "var(--control-gap)"
         },
         ":root[data-controls=\"filled\"] .border-input:not(button, [data-slot=\"checkbox\"], [data-slot=\"radio\"], [data-slot=\"slider-thumb\"], [data-slot=\"badge\"]):is( :disabled, [data-disabled], :has(:disabled) )": {
           "opacity": "1"
@@ -757,8 +839,8 @@
           "input": "oklch(0.98 0.0065 229 / 15%)",
           "field": "oklch(0.98 0.0065 229 / 7.5%)",
           "field-hover": "oklch(0.98 0.0065 229 / 10.5%)",
-          "ring": "color-mix(in oklab, oklch(calc(var(--brand-l) + 0.16) var(--brand-c) var(--brand-h)) 64%, transparent)",
-          "focus-border": "color-mix(in oklab, oklch(calc(var(--brand-l) + 0.16) var(--brand-c) var(--brand-h)) 65%, transparent)",
+          "ring": "var(--focus-border)",
+          "focus-border": "oklch(0.4 0 0)",
           "destructive": "oklch(0.57 0.1977 28.18)",
           "destructive-foreground": "oklch(0.704 0.191 22.22)",
           "success-foreground": "oklch(0.765 0.177 163.223)",
@@ -806,8 +888,8 @@
           "input": "oklch(0.2 0.0065 229 / 10%)",
           "field": "oklch(0.2 0.0065 229 / 5%)",
           "field-hover": "oklch(0.2 0.0065 229 / 8%)",
-          "ring": "color-mix(in oklab, var(--brand) 64%, transparent)",
-          "focus-border": "color-mix(in oklab, var(--brand) 80%, transparent)",
+          "ring": "var(--focus-border)",
+          "focus-border": "oklch(0.82 0 0)",
           "destructive": "oklch(0.5788 0.2215 27.8)",
           "destructive-foreground": "oklch(0.52 0.2235 28.32)",
           "info": "var(--brand)",

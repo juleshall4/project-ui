@@ -1,0 +1,27 @@
+/* Website-only preview surfaces. Dark mode keeps its original page background. */
+[data-slot="showcase-stage"] {
+  background-color: var(--page);
+}
+
+:where(:root:not(.dark)) [data-slot="showcase-stage"] {
+  background-color: var(--card);
+}
+
+/* Use grey behind white panels, rather than behind individual controls. */
+:where(:root:not(.dark)) [data-slot="showcase-stage"]:where(
+  :has([data-slot="card"], [data-slot="frame-panel"], [data-slot="toolbar"])
+) {
+  background-color: var(--page);
+}
+
+/* Grey frames and transparent alerts are demonstrated against white. */
+:where(:root:not(.dark)) [data-slot="showcase-stage"]:where(
+  :has(> [data-slot="frame"], > [data-slot="card-frame"]),
+  :has(> [data-slot="showcase-alert-backing"])
+) {
+  background-color: var(--card);
+}
+
+:where(:root:not(.dark)) [data-slot="showcase-alert-backing"] {
+  background-color: var(--page);
+}

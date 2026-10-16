@@ -12,12 +12,10 @@
  * do checkboxes, radios, slider thumbs, and badges. Focus and error borders
  * still show.
  *
- * Focus: focused controls show the --focus-border colour in both modes. The
- * palette picks the softest brand strength that keeps 3:1 contrast, the WCAG
- * minimum for focus indicators, so the border is visible without reading as
- * harsh. Text fields show no halo, because the caret already shows where you
- * are typing. Selects and buttons keep their halo, which only appears for
- * keyboard focus.
+ * Focus: focused controls use a monochrome --focus-border colour, tuned for
+ * light or dark surfaces with a restrained contrast. The --ring token uses the
+ * same neutral colour. Text fields show no halo, because the caret already
+ * shows where you are typing. Selects and buttons keep their keyboard halo.
  *
  * Shadows: set data-shadows="off" on <html> to remove drop shadows. Focus
  * rings and pressed states are unaffected.
@@ -25,10 +23,55 @@
  * Layering: fixes Coss tint layers that cover content. Always on.
  */
 
-/* Group corner utilities create a ::before layer; keep it out of flex layout. */
-[data-slot="group"] > :is(button, [data-slot="button"])::before {
+/* Decorative button layers must not become extra items in the flex layout. */
+:is(button, a).inline-flex::before,
+[data-slot="group"] > [data-slot="button"]::before {
   position: absolute;
   pointer-events: none;
+}
+
+/* Use the control's gap and padding without an implicit SVG margin.
+ * Explicit icon margins in examples remain available for optical adjustments. */
+:is(button.inline-flex, a.inline-flex, [data-slot="group-text"], [data-slot="tabs-tab"])
+  > svg:not([class*="m-"], [class*="mx-"], [class*="ms-"], [class*="me-"], [class*="ml-"], [class*="mr-"]) {
+  margin-inline: 0;
+}
+
+/* Keep each joined control's normal content inset. Internal borders are
+ * transparent, and the separator provides the visible seam. */
+:is([data-slot="group"], [data-slot="toggle-group"][data-variant="outline"])
+  > :is(button, .border-input) {
+  background-clip: border-box;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"][data-variant="outline"]):not([data-orientation="vertical"])
+  > :is(button, .border-input) {
+  border-inline-width: 0.75px;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"][data-variant="outline"]):not([data-orientation="vertical"])
+  > :is(button, .border-input):has(~ [data-slot]) {
+  border-inline-end-color: transparent;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"][data-variant="outline"]):not([data-orientation="vertical"])
+  > [data-slot] ~ :is(button, .border-input) {
+  border-inline-start-color: transparent;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"][data-variant="outline"])[data-orientation="vertical"]
+  > :is(button, .border-input) {
+  border-block-width: 0.75px;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"][data-variant="outline"])[data-orientation="vertical"]
+  > :is(button, .border-input):has(~ [data-slot]) {
+  border-block-end-color: transparent;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"][data-variant="outline"])[data-orientation="vertical"]
+  > [data-slot] ~ :is(button, .border-input) {
+  border-block-start-color: transparent;
 }
 
 :root[data-controls="filled"]
@@ -49,6 +92,32 @@
     :has([aria-invalid])
   ) {
   border-color: transparent;
+}
+
+/* Joined controls use a consistent 2px gap rather than a fractional line.
+ * The gap reveals the surrounding surface, including during hover and focus. */
+:is([data-slot="group"], [data-slot="toggle-group"]):has(> [data-slot="separator"]) {
+  --control-gap: calc(var(--spacing, 0.25rem) / 2);
+  gap: 0;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"]) > [data-slot="separator"] {
+  background: transparent;
+  translate: none;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"]) > [data-slot="separator"]::before {
+  background: transparent;
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"])
+  > [data-slot="separator"][data-orientation="vertical"] {
+  width: var(--control-gap);
+}
+
+:is([data-slot="group"], [data-slot="toggle-group"])
+  > [data-slot="separator"][data-orientation="horizontal"] {
+  height: var(--control-gap);
 }
 
 /*

@@ -202,8 +202,8 @@
   --input: oklch(0.2 0.0065 229 / 10%);
   --field: oklch(0.2 0.0065 229 / 5%);
   --field-hover: oklch(0.2 0.0065 229 / 8%);
-  --ring: color-mix(in oklab, var(--brand) 64%, transparent);
-  --focus-border: color-mix(in oklab, var(--brand) 80%, transparent);
+  --ring: var(--focus-border);
+  --focus-border: oklch(0.82 0 0);
   --destructive: oklch(0.5788 0.2215 27.8);
   --destructive-foreground: oklch(0.52 0.2235 28.32);
   --info: var(--brand);
@@ -260,8 +260,8 @@
   --input: oklch(0.98 0.0065 229 / 15%);
   --field: oklch(0.98 0.0065 229 / 7.5%);
   --field-hover: oklch(0.98 0.0065 229 / 10.5%);
-  --ring: color-mix(in oklab, oklch(calc(var(--brand-l) + 0.16) var(--brand-c) var(--brand-h)) 64%, transparent);
-  --focus-border: color-mix(in oklab, oklch(calc(var(--brand-l) + 0.16) var(--brand-c) var(--brand-h)) 65%, transparent);
+  --ring: var(--focus-border);
+  --focus-border: oklch(0.4 0 0);
   --destructive: oklch(0.57 0.1977 28.18);
   --destructive-foreground: oklch(0.704 0.191 22.22);
   --success-foreground: oklch(0.765 0.177 163.223);

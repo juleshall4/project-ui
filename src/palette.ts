@@ -85,12 +85,6 @@ const darkSurfaces: Record<DarkStyle, Record<string, number>> = {
 /** WCAG AA for normal text. */
 export const minimumContrast = 4.5;
 
-/** WCAG AA for focus indicators and other non-text parts of a control. */
-const minimumFocusContrast = 3;
-
-/** Lightness added to the brand for focus in dark mode, where the brand reads as dim. */
-const darkFocusLift = 0.16;
-
 const white: Oklch = { c: 0, h: 0, l: 1 };
 const darkText: Oklch = { c: 0, h: 0, l: 0.2 };
 
@@ -149,27 +143,6 @@ function readable(text: Oklch, background: Oklch, step: number): Oklch {
     colour = { ...colour, l: round(colour.l + step, 3) };
   }
   return colour;
-}
-
-/**
- * The focus border: the softest strength of a colour, in 5% steps, that keeps
- * 3:1 contrast on every surface a control sits on.
- */
-function focusBorder(colour: Oklch, css: string, surfaces: Oklch[]): string {
-  let strength = 50;
-  while (
-    strength < 100 &&
-    surfaces.some((surface) => contrastRatio({ ...colour, alpha: strength / 100 }, surface) < minimumFocusContrast)
-  ) {
-    strength += 5;
-  }
-  return `color-mix(in oklab, ${css} ${strength}%, transparent)`;
-}
-
-/** A translucent tint over a surface, mixed in OKLab lightness. Close enough for contrast checks. */
-function over(tint: Oklch, surface: Oklch): Oklch {
-  const alpha = tint.alpha ?? 1;
-  return { ...surface, l: surface.l * (1 - alpha) + tint.l * alpha };
 }
 
 type Mode = { tokens: Record<string, string>; values: Record<string, Oklch> };
@@ -259,12 +232,8 @@ function lightMode({ brand, brandForeground, tone, contrast }: PaletteInput): Mo
     "--input": format(values.input),
     "--field": format(values.field),
     "--field-hover": format(values["field-hover"]),
-    "--ring": "color-mix(in oklab, var(--brand) 64%, transparent)",
-    "--focus-border": focusBorder(brandColour, "var(--brand)", [
-      values.card,
-      values.page,
-      over(values.field, values.page),
-    ]),
+    "--ring": "var(--focus-border)",
+    "--focus-border": "oklch(0.82 0 0)",
     "--destructive": "oklch(0.5788 0.2215 27.8)",
     "--destructive-foreground": format(values["destructive-foreground"]),
     "--info": "var(--brand)",
@@ -338,7 +307,6 @@ function darkMode({ brand, brandForeground, tone, darkStyle, contrast }: Palette
     0.01,
   );
 
-  const darkFocus = `oklch(calc(var(--brand-l) + ${darkFocusLift}) var(--brand-c) var(--brand-h))`;
   const tokens: Record<string, string> = {
     "--brand": "oklch(var(--brand-l) var(--brand-c) var(--brand-h))",
     "--brand-foreground": format(values["brand-foreground"]),
@@ -371,14 +339,8 @@ function darkMode({ brand, brandForeground, tone, darkStyle, contrast }: Palette
     "--input": format(values.input),
     "--field": format(values.field),
     "--field-hover": format(values["field-hover"]),
-    // The brand is tuned for light surfaces, so focus uses a lighter version
-    // that reads as clearly on dark ones.
-    "--ring": `color-mix(in oklab, ${darkFocus} 64%, transparent)`,
-    "--focus-border": focusBorder(
-      { ...brandColour, l: brandColour.l + darkFocusLift },
-      darkFocus,
-      [values.card, values.page, over(values.field, values.card)],
-    ),
+    "--ring": "var(--focus-border)",
+    "--focus-border": "oklch(0.4 0 0)",
     "--destructive": "oklch(0.57 0.1977 28.18)",
     "--destructive-foreground": format(values["destructive-foreground"]),
     "--success-foreground": "oklch(0.765 0.177 163.223)",

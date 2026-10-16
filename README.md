@@ -98,9 +98,9 @@ All motion lives in `src/motion.css`. It targets the `data-slot` attributes on C
 | Smooth | Slightly longer and softer, with the iOS drawer curve. |
 | Springy | A small spring bounce on popups, dialogs, switches, and tabs. Checkbox ticks pop in. |
 
-To choose a preset, set `data-motion` on the `<html>` element. Leave it out for Snappy. Control and shadow styles work the same way: set `data-controls="filled"` or `data-shadows="off"`. Their rules are in `src/surfaces.css`.
+To choose a preset, set `data-motion` on the `<html>` element. Leave it out for Snappy. Control and shadow styles work the same way: set `data-controls="filled"` or `data-shadows="off"`. Their rules are in `src/surfaces.css`. Joined button, field, and toggle groups use a consistent 2px gap between controls, in both orientations and control styles.
 
-Focused controls show a single border in the `focus-border` colour, the same way in light and dark mode. The palette picks the softest strength of the brand colour that keeps 3:1 contrast, the WCAG AA minimum for focus indicators, on every surface. In dark mode it uses a lighter version of the brand colour, which reads more clearly there. Text fields show no halo, because the cursor already shows where you are typing. Selects and buttons keep their halo, which appears only for keyboard focus.
+Focused controls use a monochrome `focus-border` colour: a darker grey in light mode and a lighter grey in dark mode. The palette uses a soft grey in each mode, independently of the brand colour. Focus rings use the same neutral colour; gaps between controls keep showing the surface beneath. Text fields show no halo, because the cursor already shows where you are typing. Selects and buttons keep their halo, which appears only for keyboard focus.
 
 ```html
 <html data-motion="springy">
@@ -116,7 +116,7 @@ To tune motion, change the tokens at the top of `src/motion.css`, such as `--dur
 
 ## Colours
 
-`src/palette.ts` generates every colour from four inputs: the brand colour, the tone, the dark mode style, and the contrast level. It produces matching light and dark values, and adjusts derived colours until they pass WCAG AA: soft badge text reaches 4.5:1, and the focus border reaches 3:1. Every preset combination passes AA.
+`src/palette.ts` generates every colour from four inputs: the brand colour, the tone, the dark mode style, and the contrast level. It produces matching light and dark values, and adjusts derived text colours, such as soft badge text, until they reach 4.5:1 contrast. Every preset combination passes WCAG AA for text.
 
 Surfaces have three levels, which the generator derives from the same four inputs:
 
