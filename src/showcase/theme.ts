@@ -71,6 +71,20 @@ export const motionPresets: { label: string; value: MotionPreset }[] = [
   { label: "Springy", value: "springy" },
 ];
 
+export type ControlStyle = "outlined" | "filled";
+
+export const controlStyles: { label: string; value: ControlStyle }[] = [
+  { label: "Outlined", value: "outlined" },
+  { label: "Filled", value: "filled" },
+];
+
+export type Shadows = "on" | "off";
+
+export const shadowOptions: { label: string; value: Shadows }[] = [
+  { label: "On", value: "on" },
+  { label: "Off", value: "off" },
+];
+
 export type Font = { label: string; value: string; family: string };
 
 /** Google Fonts, loaded through Fontsource. The package is @fontsource-variable/<value>. */
@@ -104,10 +118,14 @@ export type Theme = {
   brand: string;
   colourOpacity: number;
   customHex: string;
+  brandTextMode: "auto" | "manual";
+  brandTextHex: string;
   tone: Tone;
   darkStyle: DarkStyle;
   contrast: Contrast;
   radius: string;
+  controls: ControlStyle;
+  shadows: Shadows;
   font: string;
   heading: string;
   motion: MotionPreset;
@@ -117,14 +135,18 @@ export type ThemeSettings = Theme & { mode: Mode };
 
 const projectTheme: Theme = {
   brand: "cobalt",
+  brandTextMode: "auto",
+  brandTextHex: "#ffffff",
   colourOpacity: 90,
   contrast: defaultPalette.contrast,
+  controls: "outlined",
   customHex: "#ff5a1f",
   darkStyle: defaultPalette.darkStyle,
   font: "tiktok-sans",
   heading: sameAsBody,
   motion: "snappy",
   radius: "0.625rem",
+  shadows: "on",
   tone: defaultPalette.tone,
 };
 
@@ -152,13 +174,14 @@ export const themePresets: NamedTheme[] = [
     },
   },
   {
-    description: "Violet on true black with strong contrast.",
+    description: "Violet on true black, strong contrast, and filled controls.",
     id: "midnight",
     label: "Midnight",
     theme: {
       ...projectTheme,
       brand: "violet",
       contrast: "crisp",
+      controls: "filled",
       darkStyle: "black",
       font: "geist",
     },
@@ -178,7 +201,7 @@ export const themePresets: NamedTheme[] = [
     },
   },
   {
-    description: "Greyscale, sharp corners, and no motion.",
+    description: "Greyscale, sharp corners, no shadows, and no motion.",
     id: "mono",
     label: "Mono",
     theme: {
@@ -190,6 +213,7 @@ export const themePresets: NamedTheme[] = [
       heading: "space-grotesk",
       motion: "off",
       radius: "0.375rem",
+      shadows: "off",
       tone: "neutral",
     },
   },
@@ -229,7 +253,11 @@ export function themeOf({ mode: _mode, ...theme }: ThemeSettings): Theme {
 
 const sameTheme = (a: Theme, b: Theme) =>
   (Object.keys(projectTheme) as (keyof Theme)[]).every(
-    (key) => key === "customHex" ? a.brand !== customBrand || a[key] === b[key] : a[key] === b[key],
+    (key) => {
+      if (key === "customHex" && a.brand !== customBrand) return true;
+      if (key === "brandTextHex" && a.brandTextMode !== "manual") return true;
+      return a[key] === b[key];
+    },
   );
 
 export function brandFor(theme: Theme): Brand {
@@ -240,6 +268,7 @@ export function brandFor(theme: Theme): Brand {
 export function paletteFor(theme: Theme): PaletteInput {
   return {
     brand: brandFor(theme),
+    brandForeground: theme.brandTextMode === "manual" ? hexToBrand(theme.brandTextHex) : undefined,
     contrast: theme.contrast,
     darkStyle: theme.darkStyle,
     tone: theme.tone,
@@ -257,6 +286,15 @@ function fontTokens(theme: Theme): Record<string, string> {
   return tokens;
 }
 
+/** Attributes on <html> that switch on the motion, control, and shadow styles. */
+export function htmlAttributes(theme: Theme): Record<string, string> {
+  const attributes: Record<string, string> = {};
+  if (theme.motion !== "snappy") attributes["data-motion"] = theme.motion;
+  if (theme.controls !== "outlined") attributes["data-controls"] = theme.controls;
+  if (theme.shadows !== "on") attributes["data-shadows"] = theme.shadows;
+  return attributes;
+}
+
 /** The full CSS for a theme: font imports, light and dark tokens, and motion. */
 export function themeCss(theme: Theme): string {
   const body = fontFor(theme.font);
@@ -265,11 +303,25 @@ export function themeCss(theme: Theme): string {
     .filter((font): font is Font => font !== undefined && font.value !== fonts[0].value)
     .map((font) => `@import "@fontsource-variable/${font.value}";\n`)
     .join("");
-  const motion =
-    theme.motion === "snappy"
-      ? ""
-      : `\n/* Motion: add data-motion="${theme.motion}" to the <html> element. */\n`;
-  return `${imports}${imports ? "\n" : ""}${paletteCss(paletteFor(theme), fontTokens(theme))}${motion}`;
+  const attributes = Object.entries(htmlAttributes(theme))
+    .map(([name, value]) => `${name}="${value}"`)
+    .join(" ");
+  const note = attributes ? `\n/* Add ${attributes} to the <html> element. */\n` : "";
+  return `${imports}${imports ? "\n" : ""}${paletteCss(paletteFor(theme), fontTokens(theme))}${note}`;
+}
+
+/**
+ * Applies a theme change with transitions off, so colours snap instead of every
+ * element animating at once. The reflow commits the new colours while the
+ * override still applies; it is removed after the next paint.
+ */
+function withoutTransitions(change: () => void) {
+  const style = document.createElement("style");
+  style.textContent = "*,*::before,*::after{transition:none !important}";
+  document.head.append(style);
+  change();
+  void document.body.offsetHeight;
+  requestAnimationFrame(() => requestAnimationFrame(() => style.remove()));
 }
 
 export function useThemeSettings() {
@@ -292,7 +344,8 @@ export function useThemeSettings() {
       style.id = "project-ui-theme";
       document.head.append(style);
     }
-    style.textContent = paletteCss(paletteFor(theme), fontTokens(theme));
+    const css = paletteCss(paletteFor(theme), fontTokens(theme));
+    if (style.textContent !== css) withoutTransitions(() => (style.textContent = css));
     localStorage.setItem(storageKey, JSON.stringify(settings));
   }, [settings]);
 
@@ -300,20 +353,27 @@ export function useThemeSettings() {
     localStorage.setItem(savedKey, JSON.stringify(saved));
   }, [saved]);
 
+  const { controls, motion, shadows } = settings;
   useEffect(() => {
-    if (settings.motion === "snappy") {
-      delete document.documentElement.dataset.motion;
-    } else {
-      document.documentElement.dataset.motion = settings.motion;
+    const root = document.documentElement;
+    const attributes = htmlAttributes({ ...projectTheme, controls, motion, shadows });
+    for (const name of ["data-motion", "data-controls", "data-shadows"]) {
+      if (attributes[name]) root.setAttribute(name, attributes[name]);
+      else root.removeAttribute(name);
     }
-  }, [settings.motion]);
+  }, [controls, motion, shadows]);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-color-scheme: dark)");
     const apply = () => {
       const dark = settings.mode === "dark" || (settings.mode === "system" && query.matches);
-      document.documentElement.classList.toggle("dark", dark);
-      document.documentElement.style.colorScheme = dark ? "dark" : "light";
+      const root = document.documentElement;
+      const change = () => {
+        root.classList.toggle("dark", dark);
+        root.style.colorScheme = dark ? "dark" : "light";
+      };
+      if (root.classList.contains("dark") === dark) change();
+      else withoutTransitions(change);
     };
     apply();
     query.addEventListener("change", apply);

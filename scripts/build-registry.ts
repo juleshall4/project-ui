@@ -6,6 +6,7 @@ import postcss, { type ChildNode } from "postcss";
 
 const source = await Bun.file("src/index.css").text();
 const motionSource = await Bun.file("src/motion.css").text();
+const surfacesSource = await Bun.file("src/surfaces.css").text();
 
 function block(selector: string): string {
   const start = source.indexOf(`${selector} {`);
@@ -48,7 +49,7 @@ const cssVars = {
 
 type CssObject = { [key: string]: string | CssObject };
 
-/** Converts motion.css into shadcn's nested css object, merging repeated selectors. */
+/** Converts a CSS file into shadcn's nested css object, merging repeated selectors. */
 function toCssObject(nodes: ChildNode[]): CssObject {
   const result: CssObject = {};
   for (const node of nodes) {
@@ -66,6 +67,7 @@ function toCssObject(nodes: ChildNode[]): CssObject {
 
 const motion = toCssObject(postcss.parse(motionSource).nodes);
 const { ":root": motionTokens, ...motionRules } = motion;
+const surfaces = toCssObject(postcss.parse(surfacesSource).nodes);
 
 const css = {
   ...Object.fromEntries(
@@ -74,10 +76,11 @@ const css = {
   ":root": { ...light.rules, ...(motionTokens as CssObject) },
   ".dark": dark.rules,
   ...motionRules,
+  ...surfaces,
   "@layer base": {
     "*": { "@apply border-border outline-ring/50": {} },
     "#root": { isolation: "isolate" },
-    body: { "@apply bg-background text-foreground": {}, position: "relative" },
+    body: { "@apply bg-page text-foreground": {}, position: "relative" },
     "code, kbd, samp, pre": { "font-family": "var(--font-mono)" },
     html: { "@apply font-sans antialiased": {} },
   },
@@ -101,7 +104,7 @@ const registry = {
       css,
       cssVars,
       dependencies,
-      description: "Project UI colours, radius, fonts, shadows, and motion for Coss UI. Light and dark.",
+      description: "Project UI colours, radius, fonts, shadows, control styles, and motion for Coss UI. Light and dark.",
       devDependencies: ["tw-animate-css"],
       name: "theme",
       registryDependencies: ["utils"],

@@ -1,0 +1,135 @@
+/*
+ * Project UI surfaces.
+ *
+ * Optional control and shadow styles that target Coss's classes and data-slot
+ * attributes, so the Coss component files stay untouched.
+ *
+ * Controls: set data-controls="filled" on <html> to replace the borders on
+ * fields and outline buttons with the --field fill. Coss gives control borders
+ * the border-input class, so the rule targets that class; data-slot is not
+ * reliable because a trigger replaces the slot of the button it renders.
+ * Containers such as cards, popovers, and dialogs keep their borders, and so
+ * do checkboxes, radios, slider thumbs, and badges. Focus and error borders
+ * still show.
+ *
+ * Focus: focused controls show the --focus-border colour in both modes. The
+ * palette picks the softest brand strength that keeps 3:1 contrast, the WCAG
+ * minimum for focus indicators, so the border is visible without reading as
+ * harsh. Text fields show no halo, because the caret already shows where you
+ * are typing. Selects and buttons keep their halo, which only appears for
+ * keyboard focus.
+ *
+ * Shadows: set data-shadows="off" on <html> to remove drop shadows. Focus
+ * rings and pressed states are unaffected.
+ *
+ * Layering: fixes Coss tint layers that cover content. Always on.
+ */
+
+/* Group corner utilities create a ::before layer; keep it out of flex layout. */
+[data-slot="group"] > :is(button, [data-slot="button"])::before {
+  position: absolute;
+  pointer-events: none;
+}
+
+:root[data-controls="filled"]
+  .border-input:not([data-slot="checkbox"], [data-slot="radio"], [data-slot="slider-thumb"], [data-slot="badge"]) {
+  background-color: var(--field);
+  background-clip: border-box;
+}
+
+:root[data-controls="filled"]
+  .border-input:not(
+    [data-slot="checkbox"],
+    [data-slot="radio"],
+    [data-slot="slider-thumb"],
+    [data-slot="badge"],
+    :focus-visible,
+    :has(:focus-visible),
+    [aria-invalid],
+    :has([aria-invalid])
+  ) {
+  border-color: transparent;
+}
+
+/*
+ * Disabled filled controls keep a solid fill and fade only their contents, so
+ * the control's shape stays visible without a border. Buttons fade as a whole,
+ * because their text is not wrapped in an element.
+ */
+:root[data-controls="filled"]
+  .border-input:not(button, [data-slot="checkbox"], [data-slot="radio"], [data-slot="slider-thumb"], [data-slot="badge"]):is(
+    :disabled,
+    [data-disabled],
+    :has(:disabled)
+  ) {
+  opacity: 1;
+}
+
+:root[data-controls="filled"]
+  .border-input:not(button, [data-slot="checkbox"], [data-slot="radio"], [data-slot="slider-thumb"], [data-slot="badge"]):is(
+    :disabled,
+    [data-disabled],
+    :has(:disabled)
+  )
+  > * {
+  opacity: 0.64;
+}
+
+:root[data-controls="filled"]
+  button.border-input:not([data-slot="checkbox"], [data-slot="radio"], :disabled):is(:hover, [data-pressed]) {
+  background-color: var(--field-hover);
+}
+
+.border-input:is(:focus-visible, :has(:focus-visible)):not(
+    [data-slot="checkbox"],
+    [data-slot="radio"],
+    [data-slot="slider-thumb"],
+    [data-slot="badge"],
+    [aria-invalid],
+    :has([aria-invalid])
+  ) {
+  border-color: var(--focus-border);
+}
+
+:is(
+    [data-slot="input-control"],
+    [data-slot="textarea-control"],
+    [data-slot="input-group"],
+    [data-slot="number-field-group"],
+    [data-slot="combobox-chips"],
+    [data-slot="composer"],
+    [data-slot="otp-field-input"]
+  ).border-input:is(:focus-visible, :has(:focus-visible)) {
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+/*
+ * Coss tints card frames and the command palette with a ::before layer. A
+ * positioned layer paints over unpositioned children, such as footers, which
+ * fades their text. Keep the tint behind the content instead.
+ */
+:is([data-slot="card-frame"], [data-slot="command-dialog-popup"]) {
+  isolation: isolate;
+}
+
+:is([data-slot="card-frame"], [data-slot="command-dialog-popup"])::before {
+  z-index: -1;
+}
+
+:root[data-shadows="off"] *,
+:root[data-shadows="off"] ::before,
+:root[data-shadows="off"] ::after {
+  --tw-shadow: 0 0 #0000 !important;
+}
+
+/* HSV ramps show the colours being selected rather than the theme accent. */
+[data-slot="colour-channel"] [data-slot="slider-track"] {
+  height: 0.5rem;
+  border-radius: var(--radius-sm);
+  background-image: var(--colour-gradient);
+}
+
+[data-slot="colour-channel"] [data-slot="slider-track"]::before,
+[data-slot="colour-channel"] [data-slot="slider-indicator"] {
+  display: none;
+}

@@ -1,5 +1,6 @@
 import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectItem,
@@ -13,6 +14,7 @@ import { CustomColour } from "./CustomColour";
 import { Segmented } from "./Segmented";
 import {
   brandPresets,
+  controlStyles,
   customBrand,
   fontFor,
   fonts,
@@ -20,6 +22,7 @@ import {
   motionPresets,
   paletteFor,
   radiusOptions,
+  shadowOptions,
   type ThemeController,
   themeOf,
 } from "./theme";
@@ -28,6 +31,16 @@ const brandItems = [
   ...brandPresets.map(({ id, label }) => ({ label, value: id })),
   { label: "Custom", value: customBrand },
 ];
+
+/** A small colour dot for brand options. */
+function Swatch({ colour }: { colour?: string }) {
+  return (
+    <span
+      className={colour ? "size-3 shrink-0 rounded-full" : "size-3 shrink-0 rounded-full bg-brand"}
+      style={colour ? { background: colour } : undefined}
+    />
+  );
+}
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -92,32 +105,45 @@ export function CustomiseControls({
           value={settings.brand}
         >
           <SelectTrigger aria-label="Brand colour" size="sm">
-            <span className="size-3 shrink-0 rounded-full bg-brand" />
+            <Swatch />
             <SelectValue className="flex-1" />
           </SelectTrigger>
           <SelectPopup>
             {brandPresets.map((preset) => (
               <SelectItem key={preset.id} value={preset.id}>
-                <span
-                  className="size-3 shrink-0 rounded-full"
-                  style={{
-                    background: `oklch(${preset.lightness} ${preset.chroma} ${preset.hue})`,
-                  }}
-                />
+                <Swatch colour={`oklch(${preset.lightness} ${preset.chroma} ${preset.hue})`} />
                 {preset.label}
               </SelectItem>
             ))}
             <SelectItem value={customBrand}>
-              <span
-                className="size-3 shrink-0 rounded-full"
-                style={{ background: settings.customHex }}
-              />
+              <Swatch colour={settings.customHex} />
               Custom
             </SelectItem>
           </SelectPopup>
         </Select>
         {settings.brand === customBrand && (
           <CustomColour hex={settings.customHex} onChange={(customHex) => update({ customHex })} />
+        )}
+      </Group>
+
+      <Group title="Text on brand colour">
+        <Segmented
+          label="Brand text colour mode"
+          onChange={(brandTextMode) => update({ brandTextMode })}
+          options={[
+            { label: "Auto", value: "auto" },
+            { label: "Manual", value: "manual" },
+          ]}
+          value={settings.brandTextMode}
+        />
+        {settings.brandTextMode === "manual" ? (
+          <CustomColour
+            hex={settings.brandTextHex}
+            label="Brand text colour"
+            onChange={(brandTextHex) => update({ brandTextHex })}
+          />
+        ) : (
+          <p className="text-muted-foreground text-xs">Chooses light or dark text for readability.</p>
         )}
       </Group>
 
@@ -171,6 +197,24 @@ export function CustomiseControls({
         />
       </Group>
 
+      <Group title="Controls">
+        <Segmented
+          label="Control style"
+          onChange={(controls) => update({ controls })}
+          options={controlStyles}
+          value={settings.controls}
+        />
+      </Group>
+
+      <Group title="Shadows">
+        <Segmented
+          label="Shadows"
+          onChange={(shadows) => update({ shadows })}
+          options={shadowOptions}
+          value={settings.shadows}
+        />
+      </Group>
+
       <Group title="Type">
         <FontSelect
           items={fonts}
@@ -195,21 +239,21 @@ export function CustomiseControls({
         />
       </Group>
 
-      <p className="flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-xs">
-        {failing.length === 0 ? (
-          <>
-            <CircleCheckIcon className="size-4 shrink-0 text-success" />
-            All text passes WCAG AA contrast in light and dark mode.
-          </>
-        ) : (
-          <>
-            <CircleAlertIcon className="size-4 shrink-0 text-warning" />
+      {failing.length === 0 ? (
+        <Alert variant="success">
+          <CircleCheckIcon />
+          <AlertDescription>All text passes WCAG AA contrast in light and dark mode.</AlertDescription>
+        </Alert>
+      ) : (
+        <Alert variant="warning">
+          <CircleAlertIcon />
+          <AlertDescription>
             {failing.length} text {failing.length === 1 ? "pair is" : "pairs are"} hard to read:{" "}
             {failing.map((row) => row.label.toLowerCase()).join(", ")}. See Readability on the
             Foundations page.
-          </>
-        )}
-      </p>
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }

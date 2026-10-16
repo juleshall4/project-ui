@@ -23,6 +23,7 @@
   --duration-tooltip: 125ms;
   --duration-popup: 200ms;
   --duration-modal: 250ms;
+  --duration-feedback: 250ms;
   --duration-collapse: 200ms;
   --duration-move: 200ms;
   --duration-tick: 0ms;
@@ -208,7 +209,7 @@
 
 :is([data-slot="progress-indicator"], [data-slot="meter-indicator"]) {
   transition-property: width;
-  transition-duration: 300ms;
+  transition-duration: var(--duration-move);
   transition-timing-function: var(--ease-out);
 }
 

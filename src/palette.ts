@@ -15,6 +15,7 @@ export type Brand = { lightness: number; hue: number; chroma: number };
 
 export type PaletteInput = {
   brand: Brand;
+  brandForeground?: Brand;
   tone: Tone;
   darkStyle: DarkStyle;
   contrast: Contrast;
@@ -54,15 +55,41 @@ function toneFor(tone: Tone, brand: Brand) {
   }
 }
 
+/**
+ * Surfaces come in three levels: the page, panels such as cards and popovers,
+ * and filled controls. Panels step away from the page, and crisp contrast
+ * makes the step larger.
+ *
+ * The page has its own token, --page, which the body uses. --background stays
+ * the lightest surface in light mode, because Coss components use it for
+ * things that sit on top of other surfaces, such as frame panels, tab
+ * indicators, and switch thumbs. In dark mode the two are the same.
+ *
+ * Filled controls use --field, a translucent tint, so they are always one
+ * small step from whatever surface they sit on.
+ */
+const surfaceStep = { crisp: 0.025, soft: 0.018 };
+const fieldTint = { crisp: 0.07, soft: 0.05 };
+const darkFieldTint = { crisp: 0.1, soft: 0.075 };
+
+/** How much stronger the field tint gets when a filled button is hovered or pressed. */
+const fieldHoverTint = 0.03;
+
 /** Dark-mode lightness for each surface. */
 const darkSurfaces: Record<DarkStyle, Record<string, number>> = {
-  dim: { page: 0.1822, card: 0.205, sidebar: 0.2247, secondary: 0.2766, muted: 0.269, sidebarAccent: 0.3317 },
+  dim: { page: 0.1822, card: 0.218, sidebar: 0.2247, secondary: 0.2766, muted: 0.269, sidebarAccent: 0.3317 },
   deep: { page: 0.145, card: 0.178, sidebar: 0.165, secondary: 0.25, muted: 0.24, sidebarAccent: 0.3 },
   black: { page: 0, card: 0.155, sidebar: 0.1, secondary: 0.23, muted: 0.22, sidebarAccent: 0.28 },
 };
 
 /** WCAG AA for normal text. */
 export const minimumContrast = 4.5;
+
+/** WCAG AA for focus indicators and other non-text parts of a control. */
+const minimumFocusContrast = 3;
+
+/** Lightness added to the brand for focus in dark mode, where the brand reads as dim. */
+const darkFocusLift = 0.16;
 
 const white: Oklch = { c: 0, h: 0, l: 1 };
 const darkText: Oklch = { c: 0, h: 0, l: 0.2 };
@@ -124,24 +151,50 @@ function readable(text: Oklch, background: Oklch, step: number): Oklch {
   return colour;
 }
 
+/**
+ * The focus border: the softest strength of a colour, in 5% steps, that keeps
+ * 3:1 contrast on every surface a control sits on.
+ */
+function focusBorder(colour: Oklch, css: string, surfaces: Oklch[]): string {
+  let strength = 50;
+  while (
+    strength < 100 &&
+    surfaces.some((surface) => contrastRatio({ ...colour, alpha: strength / 100 }, surface) < minimumFocusContrast)
+  ) {
+    strength += 5;
+  }
+  return `color-mix(in oklab, ${css} ${strength}%, transparent)`;
+}
+
+/** A translucent tint over a surface, mixed in OKLab lightness. Close enough for contrast checks. */
+function over(tint: Oklch, surface: Oklch): Oklch {
+  const alpha = tint.alpha ?? 1;
+  return { ...surface, l: surface.l * (1 - alpha) + tint.l * alpha };
+}
+
 type Mode = { tokens: Record<string, string>; values: Record<string, Oklch> };
 
-function lightMode({ brand, tone, contrast }: PaletteInput): Mode {
+function lightMode({ brand, brandForeground, tone, contrast }: PaletteInput): Mode {
   const t = toneFor(tone, brand);
   const crisp = contrast === "crisp";
   const surface = (l: number): Oklch => ({ c: t.surface, h: t.hue, l: Math.min(1, l) });
   const text = (l: number): Oklch => ({ c: t.text, h: t.hue, l });
   const line = (alpha: number): Oklch => ({ alpha, c: t.text, h: t.hue, l: 0.2 });
 
+  // Panels sit at the tone's lightest surface, and the page one step below.
   const page = t.page;
+  const step = surfaceStep[contrast];
   const brandColour: Oklch = { c: brand.chroma, h: brand.hue, l: brand.lightness };
   const values: Record<string, Oklch> = {
     background: surface(page),
-    card: surface(page + 0.01),
+    page: surface(page - step),
+    card: surface(page),
+    field: line(fieldTint[contrast]),
+    "field-hover": line(fieldTint[contrast] + fieldHoverTint),
     foreground: text(crisp ? 0.24 : 0.3376),
     secondary: surface(page - 0.045),
-    muted: surface(page - 0.03),
-    "muted-foreground": text(crisp ? 0.46 : 0.53),
+    muted: surface(page - step - 0.03),
+    "muted-foreground": text(crisp ? 0.44 : 0.51),
     accent: line(crisp ? 0.06 : 0.04),
     "accent-foreground": text(crisp ? 0.2 : 0.28),
     border: line(crisp ? 0.14 : 0.08),
@@ -154,7 +207,9 @@ function lightMode({ brand, tone, contrast }: PaletteInput): Mode {
     "raised-3": surface(page - 0.051),
     "raised-stroke": surface(page - 0.145),
     brand: brandColour,
-    "brand-foreground": textOn(brandColour),
+    "brand-foreground": brandForeground
+      ? { c: brandForeground.chroma, h: brandForeground.hue, l: brandForeground.lightness }
+      : textOn(brandColour),
     "brand-soft": { c: brand.chroma * 0.139, h: brand.hue, l: 0.9337 },
     "destructive-foreground": { c: 0.2235, h: 28.32, l: 0.52 },
   };
@@ -186,6 +241,7 @@ function lightMode({ brand, tone, contrast }: PaletteInput): Mode {
     "--raised-edge": "rgb(255 255 255 / 0.5)",
 
     "--background": format(values.background),
+    "--page": format(values.page),
     "--foreground": format(values.foreground),
     "--card": format(values.card),
     "--card-foreground": "var(--foreground)",
@@ -201,7 +257,14 @@ function lightMode({ brand, tone, contrast }: PaletteInput): Mode {
     "--accent-foreground": format(values["accent-foreground"]),
     "--border": format(values.border),
     "--input": format(values.input),
+    "--field": format(values.field),
+    "--field-hover": format(values["field-hover"]),
     "--ring": "color-mix(in oklab, var(--brand) 64%, transparent)",
+    "--focus-border": focusBorder(brandColour, "var(--brand)", [
+      values.card,
+      values.page,
+      over(values.field, values.page),
+    ]),
     "--destructive": "oklch(0.5788 0.2215 27.8)",
     "--destructive-foreground": format(values["destructive-foreground"]),
     "--info": "var(--brand)",
@@ -231,7 +294,7 @@ function lightMode({ brand, tone, contrast }: PaletteInput): Mode {
   return { tokens, values };
 }
 
-function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
+function darkMode({ brand, brandForeground, tone, darkStyle, contrast }: PaletteInput): Mode {
   const t = toneFor(tone, brand);
   const d = darkSurfaces[darkStyle];
   const crisp = contrast === "crisp";
@@ -242,7 +305,10 @@ function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
   const brandColour: Oklch = { c: brand.chroma, h: brand.hue, l: brand.lightness };
   const values: Record<string, Oklch> = {
     background: surface(d.page),
+    page: surface(d.page),
     card: surface(d.card),
+    field: line(darkFieldTint[contrast]),
+    "field-hover": line(darkFieldTint[contrast] + fieldHoverTint),
     foreground: text(crisp ? 0.96 : 0.9006),
     secondary: surface(d.secondary),
     muted: surface(d.muted),
@@ -260,7 +326,9 @@ function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
     "raised-3": surface(d.page + 0.009),
     "raised-stroke": surface(d.page - 0.03),
     brand: brandColour,
-    "brand-foreground": textOn(brandColour),
+    "brand-foreground": brandForeground
+      ? { c: brandForeground.chroma, h: brandForeground.hue, l: brandForeground.lightness }
+      : textOn(brandColour),
     "brand-soft": { c: brand.chroma * 0.357, h: brand.hue, l: 0.3241 },
     "destructive-foreground": { c: 0.191, h: 22.216, l: 0.704 },
   };
@@ -270,6 +338,7 @@ function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
     0.01,
   );
 
+  const darkFocus = `oklch(calc(var(--brand-l) + ${darkFocusLift}) var(--brand-c) var(--brand-h))`;
   const tokens: Record<string, string> = {
     "--brand": "oklch(var(--brand-l) var(--brand-c) var(--brand-h))",
     "--brand-foreground": format(values["brand-foreground"]),
@@ -288,6 +357,7 @@ function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
     "--raised-edge": "rgb(255 255 255 / 0.1)",
 
     "--background": format(values.background),
+    "--page": "var(--background)",
     "--foreground": format(values.foreground),
     "--card": format(values.card),
     "--popover": format(values.card),
@@ -299,6 +369,16 @@ function darkMode({ brand, tone, darkStyle, contrast }: PaletteInput): Mode {
     "--accent-foreground": format(values["accent-foreground"]),
     "--border": format(values.border),
     "--input": format(values.input),
+    "--field": format(values.field),
+    "--field-hover": format(values["field-hover"]),
+    // The brand is tuned for light surfaces, so focus uses a lighter version
+    // that reads as clearly on dark ones.
+    "--ring": `color-mix(in oklab, ${darkFocus} 64%, transparent)`,
+    "--focus-border": focusBorder(
+      { ...brandColour, l: brandColour.l + darkFocusLift },
+      darkFocus,
+      [values.card, values.page, over(values.field, values.card)],
+    ),
     "--destructive": "oklch(0.57 0.1977 28.18)",
     "--destructive-foreground": format(values["destructive-foreground"]),
     "--success-foreground": "oklch(0.765 0.177 163.223)",
@@ -329,29 +409,40 @@ export function paletteCss(input: PaletteInput, extraRootTokens: Record<string, 
   return block(":root", { ...extraRootTokens, ...light.tokens }) + block(".dark", dark.tokens);
 }
 
-/** Text and background pairs people read, checked against WCAG AA (4.5:1). */
-const readablePairs: { label: string; text: string; background: string }[] = [
-  { background: "background", label: "Body text", text: "foreground" },
+/**
+ * Text and background pairs people read, checked against WCAG AA (4.5:1). A
+ * translucent background, such as --field, is checked over the surface under it.
+ */
+const readablePairs: { label: string; text: string; background: string; under?: string }[] = [
+  { background: "page", label: "Body text", text: "foreground" },
+  { background: "background", label: "Text on light surfaces", text: "foreground" },
   { background: "card", label: "Text on cards", text: "foreground" },
-  { background: "background", label: "Muted text", text: "muted-foreground" },
+  { background: "page", label: "Muted text", text: "muted-foreground" },
   { background: "muted", label: "Muted text on muted surfaces", text: "muted-foreground" },
   { background: "secondary", label: "Secondary buttons", text: "foreground" },
+  { background: "field", label: "Text in filled controls on the page", text: "foreground", under: "page" },
+  { background: "field", label: "Text in filled controls on cards", text: "foreground", under: "card" },
+  { background: "field", label: "Muted text in filled controls on the page", text: "muted-foreground", under: "page" },
+  { background: "field", label: "Muted text in filled controls on cards", text: "muted-foreground", under: "card" },
   { background: "sidebar", label: "Sidebar text", text: "sidebar-foreground" },
   { background: "brand", label: "Primary buttons", text: "brand-foreground" },
   { background: "brand-soft", label: "Soft brand badges", text: "brand-soft-foreground" },
-  { background: "background", label: "Error text", text: "destructive-foreground" },
+  { background: "page", label: "Error text", text: "destructive-foreground" },
 ];
 
 export type ContrastRow = { label: string; light: number; dark: number };
 
 export function contrastReport(input: PaletteInput): ContrastRow[] {
   const { dark, light } = generatePalette(input);
-  const ratio = (mode: Mode, text: string, background: string) =>
-    round(contrastRatio(mode.values[text], mode.values[background]), 2);
-  return readablePairs.map(({ background, label, text }) => ({
-    dark: ratio(dark, text, background),
+  const ratio = (mode: Mode, text: string, background: string, under?: string) => {
+    const a = luminance(mode.values[text]);
+    const b = luminance(mode.values[background], under ? mode.values[under] : undefined);
+    return round((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05), 2);
+  };
+  return readablePairs.map(({ background, label, text, under }) => ({
+    dark: ratio(dark, text, background, under),
     label,
-    light: ratio(light, text, background),
+    light: ratio(light, text, background, under),
   }));
 }
 

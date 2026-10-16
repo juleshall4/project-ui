@@ -1,4 +1,9 @@
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { RadioGroupPrimitive, RadioPrimitive } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
+import {
+  segmentedControlItemVariants,
+  segmentedControlRootClassName,
+} from "@/lib/segmented-control";
 
 type SegmentedProps<T extends string> = {
   label: string;
@@ -7,22 +12,26 @@ type SegmentedProps<T extends string> = {
   onChange: (value: T) => void;
 };
 
-/** A single-choice row of buttons, built on Coss Toggle Group. */
+const itemClassName = segmentedControlItemVariants({ className: "grow", size: "sm", state: "checked" });
+
+/**
+ * A single-choice row of options, built on Coss Radio Group with the segmented
+ * control styling. One option is always selected, so Radio Group fits better
+ * than Toggle Group.
+ */
 export function Segmented<T extends string>({ label, options, value, onChange }: SegmentedProps<T>) {
   return (
-    <ToggleGroup
+    <RadioGroupPrimitive
       aria-label={label}
-      className="w-full *:flex-1"
-      onValueChange={([next]) => next && onChange(next as T)}
-      size="sm"
-      value={[value]}
-      variant="outline"
+      className={cn(segmentedControlRootClassName, "w-full")}
+      onValueChange={(next) => onChange(next as T)}
+      value={value}
     >
       {options.map((option) => (
-        <ToggleGroupItem key={option.value} value={option.value}>
+        <RadioPrimitive.Root className={itemClassName} key={option.value} value={option.value}>
           {option.label}
-        </ToggleGroupItem>
+        </RadioPrimitive.Root>
       ))}
-    </ToggleGroup>
+    </RadioGroupPrimitive>
   );
 }
