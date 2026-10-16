@@ -121,17 +121,17 @@ export function CustomiseControls({
         )}
       </Group>
 
-      <Group title="Button opacity">
+      <Group title="Colour opacity">
         <div className="flex justify-end text-muted-foreground text-xs tabular-nums">
-          {settings.buttonOpacity}%
+          {settings.colourOpacity}%
         </div>
         <Slider
-          getAriaLabel={() => "Button opacity"}
+          getAriaLabel={() => "Colour opacity"}
           max={100}
           min={0}
-          onValueChange={(value) => update({ buttonOpacity: Array.isArray(value) ? value[0] : value })}
+          onValueChange={(value) => update({ colourOpacity: Array.isArray(value) ? value[0] : value })}
           step={5}
-          value={settings.buttonOpacity}
+          value={settings.colourOpacity}
         />
       </Group>
 
