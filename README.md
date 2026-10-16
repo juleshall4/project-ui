@@ -14,16 +14,19 @@ Open the local URL that Vite prints. The top bar has the following controls:
 - **Theme:** Choose a complete look. The presets are Project (the default), Paper, Midnight, Forest, Mono, and Candy. Your saved themes appear under **Saved**.
 - **Customise:** Opens a panel on the right with every setting. On wide screens it docks beside the page, so you can see changes as you make them; on small screens it slides over the page. The panel is a Coss Sidebar with `side="right"`.
   - **Brand colour:** Cobalt, Violet, Emerald, Ember, Rose, Graphite, or Custom. Custom shows a colour picker and a hex field, such as `#ff5a1f`.
-  - **Button opacity:** Adjust coloured button fills and borders from 0% to 100%. Text and icons stay opaque. The value is saved and included in copied themes.
+  - **Colour opacity:** Adjust coloured button fills and borders from 0% to 100%. Text and icons stay opaque. The value is saved and included in exported themes.
   - **Tone of the greys:** Neutral, Cool, Warm, or Brand, which tints surfaces with the brand colour.
   - **Dark mode:** Dim (charcoal), Deep (near-black), or Black (true black).
   - **Contrast:** Soft or Crisp. Crisp makes text, borders, and secondary text stronger.
   - **Corners:** None, Small, Medium, Large, or Round.
+  - **Controls:** Outlined or Filled. Filled removes the borders from fields, selects, and outline buttons and gives them a tinted fill instead. Cards, popovers, and dialogs keep their borders, and focus and error borders still show.
+  - **Shadows:** On or Off. Off removes drop shadows. Focus rings still show.
   - **Type:** The body font and the heading font.
   - **Motion:** Off, Snappy, Smooth, or Springy.
-- **Mode:** Light, system, or dark. This setting only changes your view; every theme includes both light and dark colours.
+- **Mode** (sun or moon icon): Switch between light and dark mode. Until you choose, the showcase follows your system setting. Mode only changes your view; every theme includes both light and dark colours.
 - **Saved themes** (bookmark icon): Save the current settings under a name, or delete the saved theme you're using. Saved themes stay in this browser.
-- **Copy theme:** Copies the full CSS for the current theme and a short prompt to apply it with the current Project UI components and base styles.
+- **Import theme:** Paste a theme export or choose an exported file. If your current theme has unsaved changes, you can save them first.
+- **Export:** Copy the full CSS for the current theme. **Export theme and prompt** adds a short prompt that tells a coding assistant how to apply it with the current Project UI components and base styles.
 
 The Customise panel shows whether all text is readable. The **Readability** section on the Foundations page lists each text and background pair with its contrast ratio in light and dark mode. Normal text needs at least 4.5:1 to pass WCAG AA.
 
@@ -63,9 +66,9 @@ npx shadcn@latest add @coss/p-dialog-1
 
 To copy an example's code, select the code button on its card in the showcase.
 
-### Apply copied theme settings
+### Apply exported theme settings
 
-Give the contents of **Copy theme** to your coding assistant to apply the theme and component styles. The short prompt is a CSS comment, so you can also paste the contents into your project's main CSS file. Put the `@import` lines with the other imports at the top, and the `:root` block at the end. If the CSS imports a font, install its package first. When applying the CSS manually, follow the comment's instructions to update the component styles too.
+Give the contents of **Export theme and prompt** to your coding assistant to apply the theme and component styles. The short prompt is a CSS comment, so you can also paste the contents into your project's main CSS file. Put the `@import` lines with the other imports at the top, and the `:root` block at the end. If the CSS imports a font, install its package first. When applying the CSS manually, follow the comment's instructions to update the component styles too.
 
 For example, the following CSS changes the kit to violet with rounder corners and Manrope text:
 
@@ -95,7 +98,9 @@ All motion lives in `src/motion.css`. It targets the `data-slot` attributes on C
 | Smooth | Slightly longer and softer, with the iOS drawer curve. |
 | Springy | A small spring bounce on popups, dialogs, switches, and tabs. Checkbox ticks pop in. |
 
-To choose a preset, set `data-motion` on the `<html>` element. Leave it out for Snappy.
+To choose a preset, set `data-motion` on the `<html>` element. Leave it out for Snappy. Control and shadow styles work the same way: set `data-controls="filled"` or `data-shadows="off"`. Their rules are in `src/surfaces.css`.
+
+Focused controls show a single border in the `focus-border` colour, the same way in light and dark mode. The palette picks the softest strength of the brand colour that keeps 3:1 contrast, the WCAG AA minimum for focus indicators, on every surface. In dark mode it uses a lighter version of the brand colour, which reads more clearly there. Text fields show no halo, because the cursor already shows where you are typing. Selects and buttons keep their halo, which appears only for keyboard focus.
 
 ```html
 <html data-motion="springy">
@@ -107,11 +112,21 @@ The following rules apply in every preset:
 - The command palette, comboboxes, and autocompletes never animate, because they open from the keyboard or while typing.
 - With the system's Reduce motion setting on, components fade instead of moving or scaling.
 
-To tune motion, change the tokens at the top of `src/motion.css`, such as `--duration-popup`, `--ease-out`, or `--scale-popup`. To rebuild the Springy curve, run `bun scripts/spring-easing.ts <duration> <bounce>`.
+To tune motion, change the tokens at the top of `src/motion.css`, such as `--duration-popup`, `--ease-out`, or `--scale-popup`. Toast feedback uses `--duration-feedback`. To rebuild the Springy curve, run `bun scripts/spring-easing.ts <duration> <bounce>`.
 
 ## Colours
 
-`src/palette.ts` generates every colour from four inputs: the brand colour, the tone, the dark mode style, and the contrast level. It produces matching light and dark values, and adjusts derived text colours, such as soft badge text, until they pass WCAG AA. Every preset combination passes AA.
+`src/palette.ts` generates every colour from four inputs: the brand colour, the tone, the dark mode style, and the contrast level. It produces matching light and dark values, and adjusts derived colours until they pass WCAG AA: soft badge text reaches 4.5:1, and the focus border reaches 3:1. Every preset combination passes AA.
+
+Surfaces have three levels, which the generator derives from the same four inputs:
+
+| Level | Token | Light mode | Dark mode |
+| --- | --- | --- | --- |
+| Page | `page` | One step darker than panels | The dark mode style's base |
+| Panel | `card`, `popover` | The lightest surface | One step lighter than the page |
+| Control | `field` | A translucent dark tint, one step darker than what it sits on | A translucent light tint, one step lighter than what it sits on |
+
+Crisp contrast makes the steps larger. The page uses its own token, `page`, which the body uses. In light mode, `background` stays white, because Coss components use it for surfaces that sit on top of others, such as frame panels and tab indicators. In dark mode, `page` and `background` match. Filled controls use `field`, and `field-hover` when a filled button is hovered or pressed. Both are also available as Tailwind colours, such as `bg-field`. Because the fill is translucent, a filled control reads well on the page and on a card. Disabled filled controls keep their fill and fade only their contents, so you can still see them.
 
 The default palette is written into `src/index.css` by `scripts/sync-theme.ts`, which `bun run registry` runs automatically. To change the default colours, edit `src/palette.ts`, not `src/index.css`.
 
@@ -122,7 +137,8 @@ The default palette is written into `src/index.css` by `scripts/sync-theme.ts`, 
 | Colours | Slate text, soft surfaces, light borders, and a matching dark palette. The primary colour is the brand colour. |
 | Brand tokens | `brand`, `brand-soft`, `magic`, `pro`, and `highlight`, available as Tailwind colours such as `bg-brand`. |
 | Recolouring | `--brand-l` (lightness), `--brand-h` (hue), and `--brand-c` (chroma) set every brand colour in both modes. |
-| Themes | Six theme presets, a palette generator for tone, dark mode style, and contrast, and contrast checks. |
+| Surfaces | Three surface levels (`page`, `card`, and `field`), a `focus-border` colour, filled controls, and an option to turn off shadows. |
+| Themes | Six theme presets, a palette generator for tone, dark mode style, and contrast, automatic or manual text colour on the brand colour, and contrast checks. |
 | Button variants | `raised` (a gradient surface button), `soft`, and `magic`. |
 | Button feel | Buttons scale down slightly when pressed, unless reduced motion is on. |
 | Fonts | TikTok Sans for text and Geist Mono for code. Set `--font-body` for text and `--font-display` for headings. |
@@ -162,6 +178,7 @@ This command replaces `src/components/ui/button.tsx`. Use `git diff` to restore 
 | `src/palette.ts` | The palette generator. This file is the source of truth for colours. |
 | `src/index.css` | The theme: fonts, Tailwind tokens, and the generated default palette. |
 | `src/motion.css` | Motion tokens, presets, and component animations. |
+| `src/surfaces.css` | Filled controls, focus borders, the option to turn off shadows, and a fix for Coss tint layers that cover footer text. |
 | `public/r/` | The built registry files that other projects install from. |
 | `.agents/skills/` | Coss guides for coding agents. |
 # project-ui
